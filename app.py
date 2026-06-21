@@ -21,9 +21,6 @@ from dataclasses import asdict
 from datetime import datetime
 from typing import Optional
 
-from dotenv import load_dotenv
-load_dotenv()  # reads .env locally; on Render, env vars are set in the dashboard instead and this is a no-op
-
 from flask import Flask, render_template, request, redirect, url_for, flash
 
 from yahoo_provider import YahooFinanceProvider, resample_to_4h
@@ -35,7 +32,6 @@ from calculations import (
     calculate_historical_pe_range,
 )
 from supply_demand import detect_zones, nearest_zones, calculate_rsi, suggest_action
-import twelve_data_provider
 
 app = Flask(__name__)
 app.secret_key = "dev-only-change-if-this-ever-goes-public"
@@ -93,28 +89,8 @@ def fetch_and_compute(ticker: str, overrides: Optional[dict] = None) -> dict:
     except Exception:
         yearly_prices = []
 
-    # Cross-check key fields against a second, independent data source
-    # (Twelve Data) — same "always show your work" philosophy as the FCF
-    # anomaly detection. Skipped silently if no API key is configured;
-    # never blocks the refresh if Twelve Data is down or rate-limited.
-    cross_check_results = twelve_data_provider.cross_check(
-        ticker,
-        yahoo_price=fin.info.current_price,
-        yahoo_market_cap=fin.info.market_cap,
-        yahoo_shares=fin.shares_outstanding.value,
-    )
-
     raw_inputs_cache[ticker] = (fin, yearly_prices)  # cache so override changes can recompute without refetching
-    result = compute_from_financials(fin, overrides=overrides, yearly_prices=yearly_prices)
-    result["cross_check"] = [
-        {
-            "field": r.field, "yahoo_value": r.yahoo_value, "twelve_value": r.twelve_value,
-            "available": r.available, "error": r.error,
-            "discrepancy_pct": r.discrepancy_pct, "flagged": r.flagged,
-        }
-        for r in cross_check_results
-    ]
-    return result
+    return compute_from_financials(fin, overrides=overrides, yearly_prices=yearly_prices)
 
 
 def _yearly_close_from_quarterly(quarterly_candles: list) -> list:
@@ -433,19 +409,6 @@ def build_ticker_context(ticker: str, data: dict, overrides: dict) -> dict:
             "trend_text": trend_text,
         })
 
-    cross_check_raw = data.get("cross_check", [])
-    cross_check = []
-    for item in cross_check_raw:
-        cross_check.append({
-            "field": item["field"],
-            "yahoo_value": item["yahoo_value"],
-            "twelve_value": item["twelve_value"],
-            "available": item["available"],
-            "error": item["error"],
-            "discrepancy_pct": round(item["discrepancy_pct"], 1) if item["discrepancy_pct"] is not None else None,
-            "flagged": item["flagged"],
-        })
-
     return {
         "s": s,
         "dcf": dcf,
@@ -453,8 +416,6 @@ def build_ticker_context(ticker: str, data: dict, overrides: dict) -> dict:
         "multiples": multiples,
         "profit": profit,
         "sources": sources,
-        "cross_check": cross_check,
-        "cross_check_configured": twelve_data_provider.is_configured(),
         "overrides": {
             "growth_rate_1_5": round(overrides.get("growth_rate_1_5", 0) * 100, 2) if overrides.get("growth_rate_1_5") is not None else "",
             "discount_rate": round(overrides.get("discount_rate", 0) * 100, 2) if overrides.get("discount_rate") is not None else "",
@@ -600,17 +561,10 @@ def set_override(ticker):
     # no new network call needed just to apply a manual number.
     ticker_overrides = store["overrides"].get(ticker, {})
     try:
-        previous_cross_check = store["data"].get(ticker, {}).get("cross_check")
         result = recompute_only(ticker, overrides=ticker_overrides)
         if result is None:
             # No cached fetch yet (e.g. fresh server restart) — fetch once
             result = fetch_and_compute(ticker, overrides=ticker_overrides)
-        elif previous_cross_check is not None:
-            # recompute_only() doesn't re-run the cross-check (it's a
-            # network call, kept out of the override-recompute path on
-            # purpose) — carry over the last fetch's cross-check results
-            # instead of losing them.
-            result["cross_check"] = previous_cross_check
         store["data"][ticker] = result
         save_store(store)
     except Exception as e:

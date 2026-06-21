@@ -9,7 +9,7 @@
   "data": {
     "NVDA": {
       "ticker": "NVDA",
-      "fetched_at": "2026-06-21T09:51:06",
+      "fetched_at": "2026-06-21T16:07:23",
       "company": {
         "name": "NVIDIA Corporation",
         "sector": "Technology",
@@ -21,7 +21,25 @@
           "value": 96676000000.0,
           "source": "Yahoo Finance cashflow.Free Cash Flow",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2026-01-31",
+              96676000000.0
+            ],
+            [
+              "2025-01-31",
+              60853000000.0
+            ],
+            [
+              "2024-01-31",
+              27021000000.0
+            ],
+            [
+              "2023-01-31",
+              3808000000.0
+            ]
+          ]
         },
         "growth_rate_1_5": {
           "value": 0.42029998,
@@ -33,25 +51,80 @@
           "value": 125605000000.0,
           "source": "Yahoo Finance balance_sheet.Current Assets",
           "confidence": "high",
-          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead"
+          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead",
+          "history": [
+            [
+              "2026-01-31",
+              125605000000.0
+            ],
+            [
+              "2025-01-31",
+              80126000000.0
+            ],
+            [
+              "2024-01-31",
+              44345000000.0
+            ],
+            [
+              "2023-01-31",
+              23073000000.0
+            ]
+          ]
         },
         "total_debt": {
           "value": 12814000128.0,
           "source": "Yahoo Finance info.totalDebt",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2026-01-31",
+              11040000000.0
+            ],
+            [
+              "2025-01-31",
+              9982000000.0
+            ],
+            [
+              "2024-01-31",
+              11056000000.0
+            ],
+            [
+              "2023-01-31",
+              12031000000.0
+            ]
+          ]
         },
         "shares_outstanding": {
           "value": 24221000000.0,
           "source": "Yahoo Finance info.sharesOutstanding",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2026-01-31",
+              24304000000.0
+            ],
+            [
+              "2025-01-31",
+              24477000000.0
+            ],
+            [
+              "2024-01-31",
+              24640000000.0
+            ],
+            [
+              "2023-01-31",
+              24661365720.0
+            ]
+          ]
         },
         "beta": {
           "value": 2.202,
           "source": "Yahoo Finance info.beta",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": []
         }
       },
       "dcf": {
@@ -180,6 +253,13 @@
         "assessment": "UNDERVALUED (PEG < 1.0)",
         "notes": []
       },
+      "historical_pe": {
+        "low": 0.4,
+        "high": 32.3,
+        "years_covered": 11,
+        "current_pe": 31.97,
+        "position_text": "near the high end of its historical range"
+      },
       "profitability": {
         "gross_margin_pct": 60.5,
         "net_margin_pct": 63.0,
@@ -195,11 +275,22 @@
         "fcf_positive_and_growing": true,
         "ocf_exceeds_net_income": false
       },
-      "error": null
+      "error": null,
+      "cross_check": [
+        {
+          "field": "price",
+          "yahoo_value": 210.69,
+          "twelve_value": null,
+          "available": false,
+          "error": "Twelve Data API key not configured",
+          "discrepancy_pct": null,
+          "flagged": false
+        }
+      ]
     },
     "GOOGL": {
       "ticker": "GOOGL",
-      "fetched_at": "2026-06-21T09:28:03",
+      "fetched_at": "2026-06-21T16:08:23",
       "company": {
         "name": "Alphabet Inc.",
         "sector": "Communication Services",
@@ -211,7 +302,25 @@
           "value": 73266000000.0,
           "source": "Yahoo Finance cashflow.Free Cash Flow",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2025-12-31",
+              73266000000.0
+            ],
+            [
+              "2024-12-31",
+              72764000000.0
+            ],
+            [
+              "2023-12-31",
+              69495000000.0
+            ],
+            [
+              "2022-12-31",
+              60010000000.0
+            ]
+          ]
         },
         "growth_rate_1_5": {
           "value": 0.0195,
@@ -223,25 +332,80 @@
           "value": 206038000000.0,
           "source": "Yahoo Finance balance_sheet.Current Assets",
           "confidence": "high",
-          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead"
+          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead",
+          "history": [
+            [
+              "2025-12-31",
+              206038000000.0
+            ],
+            [
+              "2024-12-31",
+              163711000000.0
+            ],
+            [
+              "2023-12-31",
+              171530000000.0
+            ],
+            [
+              "2022-12-31",
+              164795000000.0
+            ]
+          ]
         },
         "total_debt": {
           "value": 95875997696.0,
           "source": "Yahoo Finance info.totalDebt",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2025-12-31",
+              59291000000.0
+            ],
+            [
+              "2024-12-31",
+              22574000000.0
+            ],
+            [
+              "2023-12-31",
+              27121000000.0
+            ],
+            [
+              "2022-12-31",
+              29679000000.0
+            ]
+          ]
         },
         "shares_outstanding": {
           "value": 5867155790.0,
           "source": "Yahoo Finance info.sharesOutstanding",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2025-12-31",
+              12088000000.0
+            ],
+            [
+              "2024-12-31",
+              12211000000.0
+            ],
+            [
+              "2023-12-31",
+              12460000000.0
+            ],
+            [
+              "2022-12-31",
+              12849000000.0
+            ]
+          ]
         },
         "beta": {
           "value": 1.237,
           "source": "Yahoo Finance info.beta",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": []
         }
       },
       "dcf": {
@@ -370,6 +534,13 @@
         "assessment": "OVERVALUED (PEG > 1.5)",
         "notes": []
       },
+      "historical_pe": {
+        "low": 3.2,
+        "high": 28.1,
+        "years_covered": 11,
+        "current_pe": 28.03,
+        "position_text": "near the high end of its historical range"
+      },
       "profitability": {
         "gross_margin_pct": 56.9,
         "net_margin_pct": 37.9,
@@ -385,7 +556,18 @@
         "fcf_positive_and_growing": true,
         "ocf_exceeds_net_income": true
       },
-      "error": null
+      "error": null,
+      "cross_check": [
+        {
+          "field": "price",
+          "yahoo_value": 368.03,
+          "twelve_value": null,
+          "available": false,
+          "error": "Twelve Data API key not configured",
+          "discrepancy_pct": null,
+          "flagged": false
+        }
+      ]
     },
     "AMZN": {
       "ticker": "AMZN",
