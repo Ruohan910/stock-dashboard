@@ -16,6 +16,7 @@ later if multi-user support is added.
 
 import json
 import os
+import time
 import traceback
 from dataclasses import asdict
 from datetime import datetime
@@ -39,6 +40,15 @@ app.secret_key = "dev-only-change-if-this-ever-goes-public"
 STORE_PATH = os.path.join(os.path.dirname(__file__), "watchlist.json")
 
 provider = YahooFinanceProvider()
+
+# Pause between tickers during "Refresh all" to avoid bursting Yahoo
+# Finance's rate limiter. Kept short (not 3-5s) because Render's free tier
+# has a request timeout — too long a pause across a big watchlist could
+# time out the whole /refresh-all request before it finishes. This is a
+# tradeoff, not a guarantee: a large watchlist refreshed repeatedly in a
+# short window can still get rate-limited. Refreshing individual tickers
+# (rather than "Refresh all") remains the safest option if that happens.
+REFRESH_ALL_DELAY_SECONDS = 1.5
 
 # In-memory cache of the last-fetched StockFinancials per ticker. This lets
 # override changes recompute the DCF instantly without re-hitting Yahoo
@@ -475,6 +485,16 @@ def remove_ticker(ticker):
     return redirect(url_for("watchlist"))
 
 
+def _friendly_fetch_error(e: Exception) -> str:
+    """Turns a raw exception into a clearer message for rate-limit cases,
+    which are common enough (yfinance hitting Yahoo Finance's informal
+    rate limiter) to deserve a specific, actionable message rather than
+    a bare exception repr."""
+    if "RateLimit" in type(e).__name__ or "Too Many Requests" in str(e):
+        return "Yahoo Finance rate-limited this request. Wait a few minutes before refreshing again."
+    return f"{type(e).__name__}: {e}"
+
+
 @app.route("/refresh/<ticker>", methods=["GET", "POST"])
 def refresh_ticker(ticker):
     ticker = ticker.upper()
@@ -489,7 +509,7 @@ def refresh_ticker(ticker):
         result = {
             "ticker": ticker,
             "fetched_at": datetime.now().isoformat(timespec="seconds"),
-            "error": f"{type(e).__name__}: {e}",
+            "error": _friendly_fetch_error(e),
             "traceback": traceback.format_exc(),
         }
         flash(f"Could not fetch {ticker}: {e}")
@@ -506,8 +526,18 @@ def refresh_ticker(ticker):
 
 @app.route("/refresh-all", methods=["POST"])
 def refresh_all():
+    """
+    Refreshes every ticker in the watchlist, one at a time, with a short
+    pause between each. Yahoo Finance (via yfinance) will rate-limit a
+    burst of rapid requests — each ticker fetch already makes several
+    calls internally (info, cashflow, balance sheet, income statement,
+    price history), so firing all of them back-to-back across a whole
+    watchlist is exactly the kind of burst that triggers it. The pause
+    trades a slightly slower "Refresh all" for not getting locked out.
+    """
     store = load_store()
-    for ticker in store["tickers"]:
+    tickers = store["tickers"]
+    for i, ticker in enumerate(tickers):
         try:
             ticker_overrides = store["overrides"].get(ticker, {})
             store["data"][ticker] = fetch_and_compute(ticker, overrides=ticker_overrides)
@@ -515,8 +545,12 @@ def refresh_all():
             store["data"][ticker] = {
                 "ticker": ticker,
                 "fetched_at": datetime.now().isoformat(timespec="seconds"),
-                "error": f"{type(e).__name__}: {e}",
+                "error": _friendly_fetch_error(e),
             }
+        # Pause between tickers (skip the wait after the last one) so we
+        # don't fire requests back-to-back across the whole watchlist.
+        if i < len(tickers) - 1:
+            time.sleep(REFRESH_ALL_DELAY_SECONDS)
     save_store(store)
     return redirect(url_for("watchlist"))
 
