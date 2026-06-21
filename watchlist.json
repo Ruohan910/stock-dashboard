@@ -1,0 +1,966 @@
+{
+  "tickers": [
+    "NVDA",
+    "GOOGL",
+    "AMZN",
+    "HIMS",
+    "PLTR"
+  ],
+  "data": {
+    "NVDA": {
+      "ticker": "NVDA",
+      "fetched_at": "2026-06-21T09:51:06",
+      "company": {
+        "name": "NVIDIA Corporation",
+        "sector": "Technology",
+        "current_price": 210.69,
+        "market_cap": 5103122644992
+      },
+      "raw_inputs": {
+        "fcf": {
+          "value": 96676000000.0,
+          "source": "Yahoo Finance cashflow.Free Cash Flow",
+          "confidence": "high",
+          "note": null
+        },
+        "growth_rate_1_5": {
+          "value": 0.42029998,
+          "source": "Yahoo Finance growth_estimates.+1y",
+          "confidence": "medium",
+          "note": "LTG unavailable \u2014 using next fiscal year estimate instead of 5yr"
+        },
+        "current_assets": {
+          "value": 125605000000.0,
+          "source": "Yahoo Finance balance_sheet.Current Assets",
+          "confidence": "high",
+          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead"
+        },
+        "total_debt": {
+          "value": 12814000128.0,
+          "source": "Yahoo Finance info.totalDebt",
+          "confidence": "high",
+          "note": null
+        },
+        "shares_outstanding": {
+          "value": 24221000000.0,
+          "source": "Yahoo Finance info.sharesOutstanding",
+          "confidence": "high",
+          "note": null
+        },
+        "beta": {
+          "value": 2.202,
+          "source": "Yahoo Finance info.beta",
+          "confidence": "high",
+          "note": null
+        }
+      },
+      "dcf": {
+        "intrinsic_value_per_share": 387.9,
+        "current_price": 210.69,
+        "upside_pct": 84.1,
+        "verdict": "UNDERVALUED",
+        "discount_rate": 0.081,
+        "growth_yr_1_5": 0.42029998,
+        "growth_yr_6_10": 0.21014999,
+        "growth_yr_11_20": 0.04,
+        "cash_per_share": 4.66,
+        "projection_table": [
+          [
+            1,
+            137308920866.0,
+            127020278322.0
+          ],
+          [
+            2,
+            195019857560.0,
+            166888898021.0
+          ],
+          [
+            3,
+            276986699793.0,
+            219271321482.0
+          ],
+          [
+            4,
+            393404204176.0,
+            288095331651.0
+          ],
+          [
+            5,
+            558751983323.0,
+            378521548365.0
+          ],
+          [
+            6,
+            676173707031.0,
+            423744540211.0
+          ],
+          [
+            7,
+            818271604802.0,
+            474370445050.0
+          ],
+          [
+            8,
+            990231374368.0,
+            531044763491.0
+          ],
+          [
+            9,
+            1198328487789.0,
+            594490115845.0
+          ],
+          [
+            10,
+            1450157207515.0,
+            665515455823.0
+          ],
+          [
+            11,
+            1508163495815.0,
+            640273889043.0
+          ],
+          [
+            12,
+            1568490035648.0,
+            615989680486.0
+          ],
+          [
+            13,
+            1631229637074.0,
+            592626519616.0
+          ],
+          [
+            14,
+            1696478822557.0,
+            570149473081.0
+          ],
+          [
+            15,
+            1764337975459.0,
+            548524932474.0
+          ],
+          [
+            16,
+            1834911494477.0,
+            527720564082.0
+          ],
+          [
+            17,
+            1908307954256.0,
+            507705260542.0
+          ],
+          [
+            18,
+            1984640272427.0,
+            488449094323.0
+          ],
+          [
+            19,
+            2064025883324.0,
+            469923272985.0
+          ],
+          [
+            20,
+            2146586918657.0,
+            452100096118.0
+          ]
+        ],
+        "missing_inputs": [],
+        "fcf_warning": null,
+        "growth_yr_1_5_auto": 0.42029998,
+        "discount_rate_auto": 0.081,
+        "growth_yr_1_5_is_override": false,
+        "discount_rate_is_override": false
+      },
+      "multiples": {
+        "pe_ratio": 31.97,
+        "peg_ratio": 0.76,
+        "price_fcf_ratio": 52.79,
+        "assessment": "UNDERVALUED (PEG < 1.0)",
+        "notes": []
+      },
+      "profitability": {
+        "gross_margin_pct": 60.5,
+        "net_margin_pct": 63.0,
+        "roa_pct": 77.2,
+        "roe_pct": 101.5,
+        "eps": 6.53
+      },
+      "health": {
+        "verdict": "CONDITIONAL PASS",
+        "reasoning": "Most quality checks pass, but at least one area (see flags below) needs a closer look before treating this as a high-conviction quality company.",
+        "revenue_growing": true,
+        "net_income_growing": true,
+        "fcf_positive_and_growing": true,
+        "ocf_exceeds_net_income": false
+      },
+      "error": null
+    },
+    "GOOGL": {
+      "ticker": "GOOGL",
+      "fetched_at": "2026-06-21T09:28:03",
+      "company": {
+        "name": "Alphabet Inc.",
+        "sector": "Communication Services",
+        "current_price": 368.03,
+        "market_cap": 4490912595968
+      },
+      "raw_inputs": {
+        "fcf": {
+          "value": 73266000000.0,
+          "source": "Yahoo Finance cashflow.Free Cash Flow",
+          "confidence": "high",
+          "note": null
+        },
+        "growth_rate_1_5": {
+          "value": 0.0195,
+          "source": "Yahoo Finance growth_estimates.+1y",
+          "confidence": "medium",
+          "note": "LTG unavailable \u2014 using next fiscal year estimate instead of 5yr"
+        },
+        "current_assets": {
+          "value": 206038000000.0,
+          "source": "Yahoo Finance balance_sheet.Current Assets",
+          "confidence": "high",
+          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead"
+        },
+        "total_debt": {
+          "value": 95875997696.0,
+          "source": "Yahoo Finance info.totalDebt",
+          "confidence": "high",
+          "note": null
+        },
+        "shares_outstanding": {
+          "value": 5867155790.0,
+          "source": "Yahoo Finance info.sharesOutstanding",
+          "confidence": "high",
+          "note": null
+        },
+        "beta": {
+          "value": 1.237,
+          "source": "Yahoo Finance info.beta",
+          "confidence": "high",
+          "note": null
+        }
+      },
+      "dcf": {
+        "intrinsic_value_per_share": 177.23,
+        "current_price": 368.03,
+        "upside_pct": -51.8,
+        "verdict": "OVERVALUED",
+        "discount_rate": 0.07,
+        "growth_yr_1_5": 0.0195,
+        "growth_yr_6_10": 0.00975,
+        "growth_yr_11_20": 0.04,
+        "cash_per_share": 18.78,
+        "projection_table": [
+          [
+            1,
+            74694687000.0,
+            69808118692.0
+          ],
+          [
+            2,
+            76151233396.0,
+            66513436454.0
+          ],
+          [
+            3,
+            77636182448.0,
+            63374250902.0
+          ],
+          [
+            4,
+            79150088005.0,
+            60383223173.0
+          ],
+          [
+            5,
+            80693514722.0,
+            57533360770.0
+          ],
+          [
+            6,
+            81480276490.0,
+            54293748634.0
+          ],
+          [
+            7,
+            82274709186.0,
+            51236553909.0
+          ],
+          [
+            8,
+            83076887600.0,
+            48351504962.0
+          ],
+          [
+            9,
+            83886887255.0,
+            45628908538.0
+          ],
+          [
+            10,
+            84704784405.0,
+            43059617193.0
+          ],
+          [
+            11,
+            88092975781.0,
+            41852338206.0
+          ],
+          [
+            12,
+            91616694813.0,
+            40678908163.0
+          ],
+          [
+            13,
+            95281362605.0,
+            39538378028.0
+          ],
+          [
+            14,
+            99092617109.0,
+            38429825373.0
+          ],
+          [
+            15,
+            103056321794.0,
+            37352353633.0
+          ],
+          [
+            16,
+            107178574666.0,
+            36305091382.0
+          ],
+          [
+            17,
+            111465717652.0,
+            35287191623.0
+          ],
+          [
+            18,
+            115924346358.0,
+            34297831111.0
+          ],
+          [
+            19,
+            120561320213.0,
+            33336209678.0
+          ],
+          [
+            20,
+            125383773021.0,
+            32401549593.0
+          ]
+        ],
+        "missing_inputs": [],
+        "fcf_warning": null,
+        "growth_yr_1_5_auto": 0.0195,
+        "discount_rate_auto": 0.07,
+        "growth_yr_1_5_is_override": false,
+        "discount_rate_is_override": false
+      },
+      "multiples": {
+        "pe_ratio": 28.03,
+        "peg_ratio": 14.37,
+        "price_fcf_ratio": 61.3,
+        "assessment": "OVERVALUED (PEG > 1.5)",
+        "notes": []
+      },
+      "profitability": {
+        "gross_margin_pct": 56.9,
+        "net_margin_pct": 37.9,
+        "roa_pct": 26.9,
+        "roe_pct": 38.6,
+        "eps": 13.1
+      },
+      "health": {
+        "verdict": "PASS",
+        "reasoning": "Revenue, net income, and FCF all show a consistent growth trend, and cash generation backs up reported earnings.",
+        "revenue_growing": true,
+        "net_income_growing": true,
+        "fcf_positive_and_growing": true,
+        "ocf_exceeds_net_income": true
+      },
+      "error": null
+    },
+    "AMZN": {
+      "ticker": "AMZN",
+      "fetched_at": "2026-06-21T09:28:04",
+      "company": {
+        "name": "Amazon.com, Inc.",
+        "sector": "Consumer Cyclical",
+        "current_price": 244.39,
+        "market_cap": 2628929978368
+      },
+      "raw_inputs": {
+        "fcf": {
+          "value": 7695000000.0,
+          "source": "Yahoo Finance cashflow.Free Cash Flow",
+          "confidence": "low",
+          "note": "Latest FCF (7,695,000,000) is 24% of the prior 2-year average (32,547,500,000) \u2014 a sharp drop, likely from a capex spike or one-off item. The DCF below uses this depressed figure as its base year; verify manually before trusting the output."
+        },
+        "growth_rate_1_5": {
+          "value": 0.1367,
+          "source": "Yahoo Finance growth_estimates.+1y",
+          "confidence": "medium",
+          "note": "LTG unavailable \u2014 using next fiscal year estimate instead of 5yr"
+        },
+        "current_assets": {
+          "value": 229083000000.0,
+          "source": "Yahoo Finance balance_sheet.Current Assets",
+          "confidence": "high",
+          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead"
+        },
+        "total_debt": {
+          "value": 235540004864.0,
+          "source": "Yahoo Finance info.totalDebt",
+          "confidence": "high",
+          "note": null
+        },
+        "shares_outstanding": {
+          "value": 10757109436.0,
+          "source": "Yahoo Finance info.sharesOutstanding",
+          "confidence": "high",
+          "note": null
+        },
+        "beta": {
+          "value": 1.444,
+          "source": "Yahoo Finance info.beta",
+          "confidence": "high",
+          "note": null
+        }
+      },
+      "dcf": {
+        "intrinsic_value_per_share": 15.65,
+        "current_price": 244.39,
+        "upside_pct": -93.6,
+        "verdict": "LOW CONFIDENCE",
+        "discount_rate": 0.077,
+        "growth_yr_1_5": 0.1367,
+        "growth_yr_6_10": 0.06835,
+        "growth_yr_11_20": 0.04,
+        "cash_per_share": -0.6,
+        "projection_table": [
+          [
+            1,
+            8746906500.0,
+            8121547354.0
+          ],
+          [
+            2,
+            9942608619.0,
+            8571738976.0
+          ],
+          [
+            3,
+            11301763217.0,
+            9046885510.0
+          ],
+          [
+            4,
+            12846714248.0,
+            9548370250.0
+          ],
+          [
+            5,
+            14602860086.0,
+            10077653169.0
+          ],
+          [
+            6,
+            15600965573.0,
+            9996713800.0
+          ],
+          [
+            7,
+            16667291570.0,
+            9916424502.0
+          ],
+          [
+            8,
+            17806500949.0,
+            9836780052.0
+          ],
+          [
+            9,
+            19023575289.0,
+            9757775273.0
+          ],
+          [
+            10,
+            20323836660.0,
+            9679405026.0
+          ],
+          [
+            11,
+            21136790126.0,
+            9346872077.0
+          ],
+          [
+            12,
+            21982261731.0,
+            9025763194.0
+          ],
+          [
+            13,
+            22861552200.0,
+            8715685907.0
+          ],
+          [
+            14,
+            23776014288.0,
+            8416261229.0
+          ],
+          [
+            15,
+            24727054860.0,
+            8127123192.0
+          ],
+          [
+            16,
+            25716137054.0,
+            7847918403.0
+          ],
+          [
+            17,
+            26744782536.0,
+            7578305607.0
+          ],
+          [
+            18,
+            27814573838.0,
+            7317955275.0
+          ],
+          [
+            19,
+            28927156791.0,
+            7066549198.0
+          ],
+          [
+            20,
+            30084243063.0,
+            6823780098.0
+          ]
+        ],
+        "missing_inputs": [],
+        "fcf_warning": "Latest FCF (7,695,000,000) is 24% of the prior 2-year average (32,547,500,000) \u2014 a sharp drop, likely from a capex spike or one-off item. The DCF below uses this depressed figure as its base year; verify manually before trusting the output.",
+        "growth_yr_1_5_auto": 0.1367,
+        "discount_rate_auto": 0.077,
+        "growth_yr_1_5_is_override": false,
+        "discount_rate_is_override": false
+      },
+      "multiples": {
+        "pe_ratio": 28.95,
+        "peg_ratio": 2.12,
+        "price_fcf_ratio": 341.64,
+        "assessment": "OVERVALUED (PEG > 1.5)",
+        "notes": []
+      },
+      "profitability": {
+        "gross_margin_pct": 48.5,
+        "net_margin_pct": 12.2,
+        "roa_pct": 11.1,
+        "roe_pct": 22.1,
+        "eps": 7.72
+      },
+      "health": {
+        "verdict": "PASS",
+        "reasoning": "Revenue, net income, and FCF all show a consistent growth trend, and cash generation backs up reported earnings.",
+        "revenue_growing": true,
+        "net_income_growing": true,
+        "fcf_positive_and_growing": true,
+        "ocf_exceeds_net_income": true
+      },
+      "error": null
+    },
+    "HIMS": {
+      "ticker": "HIMS",
+      "fetched_at": "2026-06-21T09:28:05",
+      "company": {
+        "name": "Hims & Hers Health, Inc.",
+        "sector": "Healthcare",
+        "current_price": 35.47,
+        "market_cap": 8209804800
+      },
+      "raw_inputs": {
+        "fcf": {
+          "value": 57415000.0,
+          "source": "Yahoo Finance cashflow.Free Cash Flow",
+          "confidence": "high",
+          "note": null
+        },
+        "growth_rate_1_5": {
+          "value": 0.6,
+          "source": "Yahoo Finance growth_estimates.+1y",
+          "confidence": "low",
+          "note": "LTG unavailable \u2014 using next fiscal year estimate instead of 5yr | Raw value 147.2% looked unreliable (capped at 60%) \u2014 verify manually"
+        },
+        "current_assets": {
+          "value": 767638000.0,
+          "source": "Yahoo Finance balance_sheet.Current Assets",
+          "confidence": "high",
+          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead"
+        },
+        "total_debt": {
+          "value": 1132036992.0,
+          "source": "Yahoo Finance info.totalDebt",
+          "confidence": "high",
+          "note": null
+        },
+        "shares_outstanding": {
+          "value": 223080072.0,
+          "source": "Yahoo Finance info.sharesOutstanding",
+          "confidence": "high",
+          "note": null
+        },
+        "beta": {
+          "value": 2.398,
+          "source": "Yahoo Finance info.beta",
+          "confidence": "high",
+          "note": null
+        }
+      },
+      "dcf": {
+        "intrinsic_value_per_share": 57.06,
+        "current_price": 35.47,
+        "upside_pct": 60.9,
+        "verdict": "UNDERVALUED",
+        "discount_rate": 0.081,
+        "growth_yr_1_5": 0.6,
+        "growth_yr_6_10": 0.3,
+        "growth_yr_11_20": 0.04,
+        "cash_per_share": -1.63,
+        "projection_table": [
+          [
+            1,
+            91864000.0,
+            84980574.0
+          ],
+          [
+            2,
+            146982400.0,
+            125780682.0
+          ],
+          [
+            3,
+            235171840.0,
+            186169373.0
+          ],
+          [
+            4,
+            376274944.0,
+            275551338.0
+          ],
+          [
+            5,
+            602039910.0,
+            407846569.0
+          ],
+          [
+            6,
+            782651884.0,
+            490472284.0
+          ],
+          [
+            7,
+            1017447449.0,
+            589837159.0
+          ],
+          [
+            8,
+            1322681683.0,
+            709332384.0
+          ],
+          [
+            9,
+            1719486188.0,
+            853036170.0
+          ],
+          [
+            10,
+            2235332045.0,
+            1025852933.0
+          ],
+          [
+            11,
+            2324745326.0,
+            986944542.0
+          ],
+          [
+            12,
+            2417735139.0,
+            949511863.0
+          ],
+          [
+            13,
+            2514444545.0,
+            913498925.0
+          ],
+          [
+            14,
+            2615022327.0,
+            878851879.0
+          ],
+          [
+            15,
+            2719623220.0,
+            845518922.0
+          ],
+          [
+            16,
+            2828408149.0,
+            813450212.0
+          ],
+          [
+            17,
+            2941544475.0,
+            782597798.0
+          ],
+          [
+            18,
+            3059206254.0,
+            752915551.0
+          ],
+          [
+            19,
+            3181574504.0,
+            724359087.0
+          ],
+          [
+            20,
+            3308837484.0,
+            696885708.0
+          ]
+        ],
+        "missing_inputs": [],
+        "fcf_warning": null,
+        "growth_yr_1_5_auto": 0.6,
+        "discount_rate_auto": 0.081,
+        "growth_yr_1_5_is_override": false,
+        "discount_rate_is_override": false
+      },
+      "multiples": {
+        "pe_ratio": null,
+        "peg_ratio": null,
+        "price_fcf_ratio": 142.99,
+        "assessment": "INSUFFICIENT DATA",
+        "notes": [
+          "Net income is negative or zero \u2014 P/E not meaningful"
+        ]
+      },
+      "profitability": {
+        "gross_margin_pct": 73.1,
+        "net_margin_pct": -0.6,
+        "roa_pct": -0.6,
+        "roe_pct": -2.4,
+        "eps": -0.09
+      },
+      "health": {
+        "verdict": "PASS",
+        "reasoning": "Revenue, net income, and FCF all show a consistent growth trend, and cash generation backs up reported earnings.",
+        "revenue_growing": true,
+        "net_income_growing": true,
+        "fcf_positive_and_growing": true,
+        "ocf_exceeds_net_income": true
+      },
+      "error": null
+    },
+    "PLTR": {
+      "ticker": "PLTR",
+      "fetched_at": "2026-06-21T09:28:06",
+      "company": {
+        "name": "Palantir Technologies Inc.",
+        "sector": "Technology",
+        "current_price": 128.47,
+        "market_cap": 307982663680
+      },
+      "raw_inputs": {
+        "fcf": {
+          "value": 2100591000.0,
+          "source": "Yahoo Finance cashflow.Free Cash Flow",
+          "confidence": "high",
+          "note": null
+        },
+        "growth_rate_1_5": {
+          "value": 0.414,
+          "source": "Yahoo Finance growth_estimates.+1y",
+          "confidence": "medium",
+          "note": "LTG unavailable \u2014 using next fiscal year estimate instead of 5yr"
+        },
+        "current_assets": {
+          "value": 8358174000.0,
+          "source": "Yahoo Finance balance_sheet.Current Assets",
+          "confidence": "high",
+          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead"
+        },
+        "total_debt": {
+          "value": 211976992.0,
+          "source": "Yahoo Finance info.totalDebt",
+          "confidence": "high",
+          "note": null
+        },
+        "shares_outstanding": {
+          "value": 2296071334.0,
+          "source": "Yahoo Finance info.sharesOutstanding",
+          "confidence": "high",
+          "note": null
+        },
+        "beta": {
+          "value": 1.515,
+          "source": "Yahoo Finance info.beta",
+          "confidence": "high",
+          "note": null
+        }
+      },
+      "dcf": {
+        "intrinsic_value_per_share": 88.67,
+        "current_price": 128.47,
+        "upside_pct": -31.0,
+        "verdict": "OVERVALUED",
+        "discount_rate": 0.081,
+        "growth_yr_1_5": 0.414,
+        "growth_yr_6_10": 0.207,
+        "growth_yr_11_20": 0.04,
+        "cash_per_share": 3.55,
+        "projection_table": [
+          [
+            1,
+            2970235674.0,
+            2747674074.0
+          ],
+          [
+            2,
+            4199913243.0,
+            3594089862.0
+          ],
+          [
+            3,
+            5938677326.0,
+            4701242428.0
+          ],
+          [
+            4,
+            8397289738.0,
+            6149451243.0
+          ],
+          [
+            5,
+            11873767690.0,
+            8043778036.0
+          ],
+          [
+            6,
+            14331637602.0,
+            8981350684.0
+          ],
+          [
+            7,
+            17298286586.0,
+            10028205620.0
+          ],
+          [
+            8,
+            20879031909.0,
+            11197080651.0
+          ],
+          [
+            9,
+            25200991514.0,
+            12502198285.0
+          ],
+          [
+            10,
+            30417596758.0,
+            13959438788.0
+          ],
+          [
+            11,
+            31634300628.0,
+            13429987363.0
+          ],
+          [
+            12,
+            32899672653.0,
+            12920616889.0
+          ],
+          [
+            13,
+            34215659559.0,
+            12430565740.0
+          ],
+          [
+            14,
+            35584285941.0,
+            11959101175.0
+          ],
+          [
+            15,
+            37007657379.0,
+            11505518244.0
+          ],
+          [
+            16,
+            38487963674.0,
+            11069138736.0
+          ],
+          [
+            17,
+            40027482221.0,
+            10649310162.0
+          ],
+          [
+            18,
+            41628581510.0,
+            10245404781.0
+          ],
+          [
+            19,
+            43293724770.0,
+            9856818661.0
+          ],
+          [
+            20,
+            45025473761.0,
+            9482970775.0
+          ]
+        ],
+        "missing_inputs": [],
+        "fcf_warning": null,
+        "growth_yr_1_5_auto": 0.414,
+        "discount_rate_auto": 0.081,
+        "growth_yr_1_5_is_override": false,
+        "discount_rate_is_override": false
+      },
+      "multiples": {
+        "pe_ratio": 134.99,
+        "peg_ratio": 3.26,
+        "price_fcf_ratio": 146.62,
+        "assessment": "OVERVALUED (PEG > 1.5)",
+        "notes": []
+      },
+      "profitability": {
+        "gross_margin_pct": 70.6,
+        "net_margin_pct": 43.7,
+        "roa_pct": 25.6,
+        "roe_pct": 30.9,
+        "eps": 0.89
+      },
+      "health": {
+        "verdict": "PASS",
+        "reasoning": "Revenue, net income, and FCF all show a consistent growth trend, and cash generation backs up reported earnings.",
+        "revenue_growing": true,
+        "net_income_growing": true,
+        "fcf_positive_and_growing": true,
+        "ocf_exceeds_net_income": true
+      },
+      "error": null
+    }
+  },
+  "overrides": {
+    "NVDA": {}
+  }
+}

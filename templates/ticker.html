@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}{{ s.ticker }} — Stock Valuation Dashboard{% endblock %}
+
+{% set marker_pct = (s.price / dcf.intrinsic_value * 100) if dcf.intrinsic_value else 50 %}
+{% set marker_pct = [[marker_pct, 2]|max, 98]|min %}
+
+{% block headerright %}
+<a href="/" class="btn" style="padding:7px 14px;">← Watchlist</a>
+{% endblock %}
+
+{% block content %}
+<a href="/" class="faint" style="font-size:0.85rem;">← Watchlist</a>
+
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin:16px 0 28px;">
+  <div>
+    <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;">
+      <span class="num" style="font-size:2.6rem;font-weight:700;letter-spacing:-0.02em;line-height:1;">{{ s.ticker }}</span>
+      <span class="serif" style="font-size:1.35rem;font-weight:400;">{{ s.name }}</span>
+    </div>
+    <div style="display:flex;gap:16px;align-items:center;margin-top:12px;font-size:0.82rem;color:var(--faint);flex-wrap:wrap;">
+      <span>{{ s.sector }}</span>
+      <span style="width:3px;height:3px;border-radius:50%;background:var(--faint);"></span>
+      <span>Market cap <span class="num dim">{{ s.market_cap }}</span></span>
+      <span style="width:3px;height:3px;border-radius:50%;background:var(--faint);"></span>
+      <span>Updated {{ s.updated }}</span>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;">
+    <a href="/ticker/{{ s.ticker }}/chart" class="btn">Supply / demand zones</a>
+    <form method="POST" action="/refresh/{{ s.ticker }}?next=detail"><button class="btn btn-primary" type="submit">↻ Refresh</button></form>
+  </div>
+</div>
+
+<section class="panel" style="position:relative;overflow:hidden;background:linear-gradient(160deg,var(--panel2),var(--panel));border-radius:18px;padding:30px 32px;margin-bottom:18px;">
+  <div style="position:absolute;inset:0;background:radial-gradient(600px 280px at 85% -40px,var(--green-bg),transparent 70%);pointer-events:none;"></div>
+  <div style="position:relative;">
+    <div class="micro" style="margin-bottom:10px;">DCF Intrinsic Valuation</div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <span class="badge {{ dcf.verdict_class }}">● {{ dcf.verdict_class|capitalize }}</span>
+      <span class="num" style="font-size:1.7rem;font-weight:700;color:var(--green);">{{ dcf.upside }}</span>
+      <span class="dim" style="font-size:0.85rem;">upside to fair value</span>
+    </div>
+
+    <div style="margin-top:28px;">
+      <div style="position:relative;height:14px;border-radius:8px;background:var(--bg);border:1px solid var(--border);overflow:hidden;">
+        <div style="position:absolute;left:{{ marker_pct }}%;right:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(84,192,138,0.18),rgba(84,192,138,0.45));"></div>
+      </div>
+      <div style="position:relative;height:0;"><div style="position:absolute;left:{{ marker_pct }}%;top:-24px;bottom:0;width:2px;background:var(--text);transform:translateX(-1px);"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:14px;">
+        <div><div class="micro">Current price</div><div class="num" style="font-size:1.55rem;font-weight:600;margin-top:2px;">${{ '%.2f'|format(s.price) }}</div></div>
+        <div style="text-align:right;"><div class="micro">Intrinsic value / share</div><div class="num" style="font-size:1.55rem;font-weight:600;margin-top:2px;color:var(--green);">${{ '%.2f'|format(dcf.intrinsic_value) }}</div></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin-top:26px;">
+      {% for label, val in [('Discount rate', dcf.discount_rate), ('Growth Yr 1-5', dcf.growth_1_5), ('Growth Yr 6-10', dcf.growth_6_10), ('Growth Yr 11-20', dcf.growth_11_20), ('Cash / share', dcf.cash_per_share)] %}
+      <div style="background:var(--panel);padding:13px 15px;"><div class="micro" style="letter-spacing:0.08em;">{{ label }}</div><div class="num" style="font-size:1.05rem;margin-top:5px;">{{ val }}</div></div>
+      {% endfor %}
+    </div>
+
+    <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--hair);">
+      <div class="micro" style="letter-spacing:0.08em;margin-bottom:12px;">Override assumptions — leave blank to use auto-fetched values</div>
+      <form method="POST" action="/set-override/{{ s.ticker }}" style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end;">
+        <div><label class="dim" style="font-size:0.76rem;display:block;margin-bottom:6px;">Growth Yr 1-5 (%)</label>
+          <input type="text" name="growth_rate_1_5" placeholder="e.g. 25" value="{{ overrides.growth_rate_1_5 or '' }}" style="width:130px;text-transform:none;"></div>
+        <div><label class="dim" style="font-size:0.76rem;display:block;margin-bottom:6px;">Discount rate (%)</label>
+          <input type="text" name="discount_rate" placeholder="e.g. 7" value="{{ overrides.discount_rate or '' }}" style="width:130px;text-transform:none;"></div>
+        <button class="btn btn-primary" type="submit">Apply override</button>
+      </form>
+    </div>
+
+    <details style="margin-top:18px;">
+      <summary>View {{ dcf.projection|length }}-year projection</summary>
+      <div style="margin-top:16px;padding-top:18px;border-top:1px solid var(--hair);">
+        <table class="num" style="width:100%;font-size:0.8rem;border-collapse:collapse;">
+          <thead><tr style="text-align:left;color:var(--faint);">
+            <th style="padding:8px 10px;font-weight:500;border-bottom:1px solid var(--border);">Year</th>
+            <th style="padding:8px 10px;font-weight:500;border-bottom:1px solid var(--border);text-align:right;">Projected FCF</th>
+            <th style="padding:8px 10px;font-weight:500;border-bottom:1px solid var(--border);text-align:right;">Present Value</th>
+          </tr></thead>
+          <tbody>
+          {% for r in dcf.projection %}
+            <tr style="border-bottom:1px solid var(--hair);">
+              <td style="padding:7px 10px;color:var(--dim);">{{ r.year }}</td>
+              <td style="padding:7px 10px;text-align:right;">{{ '{:,.0f}'.format(r.fcf) }}</td>
+              <td style="padding:7px 10px;text-align:right;">{{ '{:,.0f}'.format(r.pv) }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+</section>
+
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px;">
+  <section class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3 class="h3">Financial health</h3>
+      <span class="badge {{ health.verdict_class }}">{{ health.verdict }}</span>
+    </div>
+    <p class="dim" style="margin:0 0 18px;font-size:0.88rem;">{{ health.summary }}</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      {% for c in health.checks %}
+      <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--hair);border-radius:10px;padding:11px 13px;">
+        <span style="width:18px;height:18px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:0.7rem;
+          {% if c.ok %}background:var(--green-bg);color:var(--green);{% else %}background:var(--red-bg);color:var(--red);{% endif %}">{{ '✓' if c.ok else '✕' }}</span>
+        <span style="font-size:0.82rem;color:{{ 'var(--text)' if c.ok else 'var(--dim)' }};">{{ c.label }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3 class="h3">Pricing multiples</h3>
+      <span class="badge {{ multiples.note_class }}">{{ multiples.note_label }}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:12px;overflow:hidden;">
+      {% for label, val, hl in [('P / E ratio', multiples.pe, false), ('PEG ratio', multiples.peg, true), ('P / FCF ratio', multiples.pfcf, false)] %}
+      <div style="display:flex;justify-content:space-between;align-items:baseline;background:var(--panel);padding:13px 15px;">
+        <span class="dim" style="font-size:0.82rem;">{{ label }}</span>
+        <span class="num" style="font-size:1.15rem;font-weight:600;{% if hl %}color:var(--green);{% endif %}">{{ val }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+<section class="panel" style="margin-bottom:18px;">
+  <h3 class="h3" style="margin-bottom:18px;">Profitability ratios</h3>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;">
+    {% for label, val, hl in [('Gross margin', profit.gross, false), ('Net margin', profit.net, false), ('ROA', profit.roa, false), ('ROE', profit.roe, true), ('EPS', profit.eps, false)] %}
+    <div style="background:var(--bg);border:1px solid var(--hair);border-radius:12px;padding:16px;">
+      <div class="micro" style="letter-spacing:0.08em;">{{ label }}</div>
+      <div class="num" style="font-size:1.45rem;font-weight:600;margin-top:8px;{% if hl %}color:var(--green);{% endif %}">{{ val }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <h3 class="h3" style="margin-bottom:4px;">Data sources &amp; confidence</h3>
+  <p class="faint" style="margin:0 0 16px;font-size:0.8rem;">Every input traced to its origin with a confidence rating.</p>
+  <div style="display:flex;flex-direction:column;">
+    {% for src in sources %}
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:13px 0;border-bottom:1px solid var(--hair);">
+      <div style="min-width:140px;">
+        <div style="font-size:0.86rem;">{{ src.label }}</div>
+        <div class="faint" style="font-size:0.72rem;margin-top:3px;max-width:520px;">{{ src.note }}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex:none;">
+        <span class="num dim" style="font-size:0.86rem;">{{ src.value }}</span>
+        <span class="badge {{ src.confidence }}" style="min-width:62px;text-align:center;">{{ src.confidence }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

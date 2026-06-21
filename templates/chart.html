@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}{{ s.ticker }} Supply/Demand Zones — Stock Valuation Dashboard{% endblock %}
+
+{% block headerright %}
+<a href="/ticker/{{ s.ticker }}" class="btn" style="padding:7px 14px;">← {{ s.ticker }} detail</a>
+{% endblock %}
+
+{% block content %}
+<a href="/ticker/{{ s.ticker }}" class="faint" style="font-size:0.85rem;">← {{ s.ticker }} detail</a>
+
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin:16px 0 24px;">
+  <div>
+    <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;">
+      <span class="num" style="font-size:2rem;font-weight:700;letter-spacing:-0.02em;line-height:1;">{{ s.ticker }}</span>
+      <span class="serif" style="font-size:1.2rem;font-weight:400;">Supply / Demand Zones</span>
+    </div>
+    <div class="faint" style="font-size:0.8rem;margin-top:8px;">{{ timeframe_label }} candles · fresh &amp; used zones · LearningAlpha Chapter 5 methodology</div>
+  </div>
+  <div style="display:flex;gap:6px;background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:4px;">
+    {% for key, label in [('weekly','Weekly'), ('daily','Daily'), ('4h','4-Hour')] %}
+    <a href="/ticker/{{ s.ticker }}/chart?tf={{ key }}" style="padding:7px 16px;border-radius:8px;font-size:0.82rem;
+      {% if tf == key %}background:linear-gradient(140deg,var(--gold),#bf9234);color:#1a1408;font-weight:600;{% else %}color:var(--dim);{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr 0.8fr;gap:14px;margin-bottom:16px;">
+  <div class="panel" style="padding:16px 18px;position:relative;overflow:hidden;">
+    <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green);"></div>
+    <div class="micro">Nearest demand zone · buy</div>
+    {% if nearest_demand %}
+      <div class="num" style="font-size:1.25rem;font-weight:600;margin-top:6px;color:var(--green);">${{ '%.2f'|format(nearest_demand.low) }} – ${{ '%.2f'|format(nearest_demand.high) }}</div>
+      <div class="dim" style="font-size:0.76rem;margin-top:4px;">{{ nearest_demand.pct_away }} below current · fresh, untouched</div>
+    {% else %}<div class="faint" style="margin-top:6px;">No fresh demand zone below current price</div>{% endif %}
+  </div>
+  <div class="panel" style="padding:16px 18px;position:relative;overflow:hidden;">
+    <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red);"></div>
+    <div class="micro">Nearest supply zone · sell</div>
+    {% if nearest_supply %}
+      <div class="num" style="font-size:1.25rem;font-weight:600;margin-top:6px;color:var(--red);">${{ '%.2f'|format(nearest_supply.low) }} – ${{ '%.2f'|format(nearest_supply.high) }}</div>
+      <div class="dim" style="font-size:0.76rem;margin-top:4px;">{{ nearest_supply.pct_away }} above current · fresh, untouched</div>
+    {% else %}<div class="faint" style="margin-top:6px;">No fresh supply zone above current price</div>{% endif %}
+  </div>
+  <div class="panel" style="padding:16px 18px;">
+    <div class="micro">Current price</div>
+    <div class="num" style="font-size:1.5rem;font-weight:600;margin-top:6px;">${{ '%.2f'|format(s.price) }}</div>
+  </div>
+</div>
+
+<div class="panel" style="background:linear-gradient(160deg,var(--panel2),var(--panel));padding:18px 20px;margin-bottom:16px;">
+  <div class="micro" style="letter-spacing:0.12em;margin-bottom:14px;">Course decision framework</div>
+  <div style="display:flex;gap:36px;flex-wrap:wrap;margin-bottom:14px;">
+    <div><div class="micro" style="letter-spacing:0.08em;">RSI (14)</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:5px;">
+        <span class="num" style="font-size:1.1rem;font-weight:600;">{{ rsi }}</span>
+        <span class="badge {{ rsi_class }}">{{ rsi_label }}</span>
+      </div></div>
+    <div><div class="micro" style="letter-spacing:0.08em;">DCF fair-value range</div>
+      {% if dcf_low and dcf_high %}
+      <div class="num" style="font-size:1.1rem;font-weight:600;margin-top:5px;color:var(--green);">${{ '%.2f'|format(dcf_low) }} – ${{ '%.2f'|format(dcf_high) }}</div>
+      {% else %}
+      <div class="dim" style="font-size:0.85rem;margin-top:5px;">— (refresh ticker detail first)</div>
+      {% endif %}
+    </div>
+    <div><div class="micro" style="letter-spacing:0.08em;">Position vs zones</div>
+      <div class="num" style="font-size:1.1rem;font-weight:600;margin-top:5px;">{{ position }}</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;padding-top:14px;border-top:1px solid var(--hair);">
+    <span class="badge {{ signal.class }}" style="font-size:0.8rem;padding:6px 16px;">{{ signal.label }}</span>
+    <div class="dim" style="font-size:0.84rem;">{{ signal.text }}</div>
+  </div>
+</div>
+
+<div class="panel" style="padding:18px;">
+  <div id="chart-container" style="width:100%;height:480px;position:relative;"></div>
+</div>
+
+<div style="display:flex;gap:22px;margin-top:14px;font-size:0.8rem;color:var(--dim);flex-wrap:wrap;">
+  <div style="display:flex;align-items:center;gap:7px;"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:rgba(84,192,138,0.32);border:1px solid var(--green);"></span>Demand zone · fresh</div>
+  <div style="display:flex;align-items:center;gap:7px;"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:rgba(231,112,106,0.32);border:1px solid var(--red);"></span>Supply zone · fresh</div>
+  <div style="display:flex;align-items:center;gap:7px;"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:rgba(91,98,112,0.2);border:1px solid var(--faint);"></span>Used zone · touched</div>
+</div>
+
+<details style="margin-top:20px;">
+  <summary>View all {{ zones|length }} detected zones</summary>
+  <table class="num" style="width:100%;margin-top:10px;font-size:0.82rem;border-collapse:collapse;">
+    <tr class="faint" style="text-align:left;">
+      <th style="padding:4px 8px;">Type</th><th style="padding:4px 8px;">Range</th>
+      <th style="padding:4px 8px;">Formed</th><th style="padding:4px 8px;">Fresh</th><th style="padding:4px 8px;">Touches</th>
+    </tr>
+    {% for z in zones %}
+    <tr style="border-top:1px solid var(--hair);">
+      <td style="padding:4px 8px; color:{% if z.zone_type == 'demand' %}var(--green){% else %}var(--red){% endif %};">{{ z.zone_type|upper }}</td>
+      <td style="padding:4px 8px;">${{ "%.2f"|format(z.bottom) }} – ${{ "%.2f"|format(z.top) }}</td>
+      <td style="padding:4px 8px;">{{ z.formed_date_display }}</td>
+      <td style="padding:4px 8px;">{{ "Yes" if z.is_fresh else "No" }}</td>
+      <td style="padding:4px 8px;">{{ z.touches }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</details>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<script>
+  const candleData = {{ candle_data|tojson }};
+  const zones = {{ zones|tojson }};
+  const chartEl = document.getElementById('chart-container');
+
+  if (typeof LightweightCharts === 'undefined') {
+    chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#99a0ad;">Chart library failed to load from CDN. Check your connection and refresh.</div>';
+  } else {
+    const chart = LightweightCharts.createChart(chartEl, {
+      layout: { background: { color: 'transparent' }, textColor: '#99a0ad', fontFamily: "'JetBrains Mono', monospace" },
+      grid: { vertLines: { color: '#21242c' }, horzLines: { color: '#21242c' } },
+      rightPriceScale: { borderColor: '#2a2e38' },
+      timeScale: { borderColor: '#2a2e38' },
+      crosshair: { vertLine: { color: '#626a7c', labelBackgroundColor: '#1c1f26' }, horzLine: { color: '#626a7c', labelBackgroundColor: '#1c1f26' } },
+    });
+    const series = chart.addCandlestickSeries({
+      upColor: '#54c08a', downColor: '#e7706a', borderUpColor: '#54c08a', borderDownColor: '#e7706a',
+      wickUpColor: '#54c08a', wickDownColor: '#e7706a',
+    });
+    series.setData(candleData.map(c => ({ time: c.date || c.time, open: c.open, high: c.high, low: c.low, close: c.close })));
+
+    const overlay = document.createElement('canvas');
+    overlay.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;';
+    chartEl.appendChild(overlay);
+
+    function draw() {
+      overlay.width = chartEl.clientWidth; overlay.height = chartEl.clientHeight;
+      const ctx = overlay.getContext('2d');
+      ctx.clearRect(0, 0, overlay.width, overlay.height);
+      zones.forEach(z => {
+        const isD = z.zone_type === 'demand';
+        const rgb = isD ? '84,192,138' : '231,112,106';
+        const stroke = isD ? '#54c08a' : '#e7706a';
+        const fill = z.is_fresh ? 0.16 : 0.06, lop = z.is_fresh ? 0.9 : 0.35;
+        const sd = candleData[z.basing_candle_index] ? (candleData[z.basing_candle_index].date || candleData[z.basing_candle_index].time) : (candleData[0].date || candleData[0].time);
+        const xs = chart.timeScale().timeToCoordinate(sd);
+        const yT = series.priceToCoordinate(z.top), yB = series.priceToCoordinate(z.bottom);
+        if (xs === null || yT === null || yB === null) return;
+        const x = xs, w = Math.max(overlay.width - xs, 20), y = Math.min(yT, yB), h = Math.abs(yB - yT);
+        ctx.fillStyle = `rgba(${rgb},${fill})`; ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = `rgba(${rgb},${lop})`; ctx.lineWidth = 1.5; ctx.setLineDash(z.is_fresh ? [] : [5, 4]);
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + w, y); ctx.moveTo(x, y + h); ctx.lineTo(x + w, y + h); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = stroke; ctx.font = "11px 'JetBrains Mono', monospace";
+        ctx.fillText((isD ? 'DEMAND' : 'SUPPLY') + (z.is_fresh ? '' : ' (used)'), x + 6, y + 14);
+      });
+    }
+    chart.timeScale().fitContent();
+    chart.timeScale().subscribeVisibleTimeRangeChange(draw);
+    new ResizeObserver(() => { chart.applyOptions({ width: chartEl.clientWidth }); draw(); }).observe(chartEl);
+    requestAnimationFrame(() => requestAnimationFrame(draw));
+  }
+</script>
+{% endblock %}

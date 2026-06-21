@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Watchlist — Stock Valuation Dashboard{% endblock %}
+
+{#
+  Expected context:
+    stocks: list of dicts/objects, each with:
+      ticker, name, price, intrinsic_value, upside,
+      verdict        -> display label, e.g. "Undervalued"
+      verdict_class  -> one of: undervalued | overvalued | fair  (drives color)
+      updated        -> time string, e.g. "23:11:34"
+    counts: optional dict {undervalued, overvalued, flagged}
+#}
+
+{% set tone = {
+  'undervalued': {'accent':'var(--green)', 'bg':'var(--green-bg)', 'bd':'var(--green-bd)'},
+  'overvalued':  {'accent':'var(--red)',   'bg':'var(--red-bg)',   'bd':'var(--red-bd)'},
+  'fair':        {'accent':'var(--gold)',  'bg':'var(--gold-bg)',  'bd':'var(--gold-bd)'}
+} %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:24px;">
+  <div>
+    <h1 class="serif" style="margin:0;font-size:2rem;font-weight:500;letter-spacing:-0.01em;">Watchlist</h1>
+    <div class="faint" style="font-size:0.85rem;margin-top:4px;">{{ stocks|length }} companies tracked · sorted by upside to fair value</div>
+  </div>
+  {% if counts %}
+  <div style="display:flex;gap:18px;">
+    <div style="text-align:right;"><div class="micro">Undervalued</div><div class="num" style="font-size:1.4rem;font-weight:600;color:var(--green);margin-top:2px;">{{ counts.undervalued }}</div></div>
+    <div style="width:1px;background:var(--hair);"></div>
+    <div style="text-align:right;"><div class="micro">Overvalued</div><div class="num" style="font-size:1.4rem;font-weight:600;color:var(--red);margin-top:2px;">{{ counts.overvalued }}</div></div>
+    <div style="width:1px;background:var(--hair);"></div>
+    <div style="text-align:right;"><div class="micro">Fair Value</div><div class="num" style="font-size:1.4rem;font-weight:600;color:var(--gold);margin-top:2px;">{{ counts.fair }}</div></div>
+    <div style="width:1px;background:var(--hair);"></div>
+    <div style="text-align:right;"><div class="micro">Flagged</div><div class="num" style="font-size:1.4rem;font-weight:600;color:var(--dim);margin-top:2px;">{{ counts.flagged }}</div></div>
+  </div>
+  {% endif %}
+</div>
+
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap;">
+  <form method="POST" action="/add" style="display:flex;gap:8px;">
+    <input type="text" name="ticker" placeholder="Add ticker — e.g. NVDA" autocomplete="off" required style="width:220px;">
+    <button class="btn btn-primary" type="submit">+ Add</button>
+  </form>
+  <form method="POST" action="/refresh-all" style="margin-left:auto;">
+    <button class="btn" type="submit">↻ Refresh all</button>
+  </form>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;">
+  {% for s in stocks %}
+  {% set t = tone.get(s.verdict_class, tone['fair']) %}
+  <div class="panel" style="position:relative;overflow:hidden;padding:20px 22px;">
+    <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:{{ t.accent }};"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;">
+      <a href="/ticker/{{ s.ticker }}" style="display:flex;align-items:center;gap:28px;color:inherit;flex:1;min-width:280px;">
+        <div style="min-width:160px;">
+          <span class="num" style="font-size:1.3rem;font-weight:700;letter-spacing:-0.01em;">{{ s.ticker }}</span>
+          <div class="dim" style="font-size:0.8rem;margin-top:2px;">{{ s.name }}</div>
+        </div>
+        <div style="display:flex;gap:30px;">
+          <div><div class="micro" style="letter-spacing:0.08em;">Price</div><div class="num" style="font-size:1.05rem;margin-top:3px;">{{ s.price }}</div></div>
+          <div><div class="micro" style="letter-spacing:0.08em;">Intrinsic</div><div class="num" style="font-size:1.05rem;margin-top:3px;">{{ s.intrinsic_value }}</div></div>
+          <div><div class="micro" style="letter-spacing:0.08em;">Upside</div><div class="num" style="font-size:1.05rem;margin-top:3px;color:{{ t.accent }};">{{ s.upside }}</div></div>
+        </div>
+      </a>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="text-align:right;">
+          <span class="badge {{ s.verdict_class }}">{{ s.verdict }}</span>
+          <div class="faint" style="font-size:0.7rem;margin-top:6px;">Updated {{ s.updated }}</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <form method="POST" action="/remove/{{ s.ticker }}"><button class="btn btn-icon danger" type="submit" title="Remove">✕</button></form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
