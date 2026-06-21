@@ -394,6 +394,29 @@ def suggest_action(current_price: float, nearest_demand: Optional[Zone], nearest
     return result
 
 
+def detect_zones_for_timeframe(raw_candles: list, timeframe: str) -> list:
+    """
+    Safer entry point than calling detect_zones() directly with manually
+    matched parameters. This exists because of a real mistake made during
+    testing: calling detect_zones(months_lookback=12) without also passing
+    the matching candles_per_month silently used the weekly default
+    (4.33) against daily data, shrinking the report window from "the last
+    12 months" to roughly "the last 2.4 months" — with no error, just
+    quietly missing real zones older than that.
+
+    timeframe: one of "weekly", "daily", "4h" — must match app.py's
+    TIMEFRAME_CONFIG keys exactly.
+    """
+    configs = {
+        "weekly": dict(months_lookback=9, lookahead_candles=3, min_move_pct=0.10, candles_per_month=4.33),
+        "daily":  dict(months_lookback=4, lookahead_candles=5, min_move_pct=0.07, candles_per_month=21),
+        "4h":     dict(months_lookback=2, lookahead_candles=5, min_move_pct=0.04, candles_per_month=21 * 1.625),
+    }
+    if timeframe not in configs:
+        raise ValueError(f"Unknown timeframe '{timeframe}' — must be one of {list(configs)}")
+    return detect_zones(raw_candles, **configs[timeframe])
+
+
 def nearest_zones(zones: list, current_price: float) -> dict:
     """
     Convenience helper for the UI: given all detected zones and the current

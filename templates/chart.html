@@ -79,6 +79,9 @@
   <div style="display:flex;align-items:center;gap:7px;"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:rgba(84,192,138,0.32);border:1px solid var(--green);"></span>Demand zone · fresh</div>
   <div style="display:flex;align-items:center;gap:7px;"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:rgba(231,112,106,0.32);border:1px solid var(--red);"></span>Supply zone · fresh</div>
   <div style="display:flex;align-items:center;gap:7px;"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:rgba(91,98,112,0.2);border:1px solid var(--faint);"></span>Used zone · touched</div>
+  {% if intrinsic_value %}
+  <div style="display:flex;align-items:center;gap:7px;"><span style="display:inline-block;width:14px;height:0;border-top:2px dashed var(--gold);"></span>DCF intrinsic value</div>
+  {% endif %}
 </div>
 
 <details style="margin-top:20px;">
@@ -123,6 +126,18 @@
       wickUpColor: '#54c08a', wickDownColor: '#e7706a',
     });
     series.setData(candleData.map(c => ({ time: c.date || c.time, open: c.open, high: c.high, low: c.low, close: c.close })));
+
+    const intrinsicValue = {{ intrinsic_value|tojson }};
+    if (intrinsicValue !== null) {
+      series.createPriceLine({
+        price: intrinsicValue,
+        color: '#d6a94a',
+        lineWidth: 2,
+        lineStyle: LightweightCharts.LineStyle.Dashed,
+        axisLabelVisible: true,
+        title: 'Intrinsic value',
+      });
+    }
 
     const overlay = document.createElement('canvas');
     overlay.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;';

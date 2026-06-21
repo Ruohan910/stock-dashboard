@@ -144,7 +144,7 @@
 
 <section class="panel">
   <h3 class="h3" style="margin-bottom:4px;">Data sources &amp; confidence</h3>
-  <p class="faint" style="margin:0 0 16px;font-size:0.8rem;">Every input traced to its origin with a confidence rating.</p>
+  <p class="faint" style="margin:0 0 16px;font-size:0.8rem;">Each figure traced to its source, with a confidence rating for how reliable that source is — separate from the trend shown alongside it.</p>
   <div style="display:flex;flex-direction:column;">
     {% for src in sources %}
     <div class="tk-source-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:13px 0;border-bottom:1px solid var(--hair);">
@@ -160,7 +160,10 @@
         <span title="5-year trend">{{ src.sparkline | safe }}</span>
         {% endif %}
         <span class="num dim" style="font-size:0.86rem;">{{ src.value }}</span>
-        <span class="badge {{ src.confidence }}" style="min-width:62px;text-align:center;">{{ src.confidence }}</span>
+        <span class="badge {{ src.confidence }}" style="min-width:108px;text-align:center;"
+              title="How reliable this figure's source is — not a comment on the value itself or its trend.">
+          Confidence: {{ src.confidence|upper }}
+        </span>
       </div>
     </div>
     {% endfor %}

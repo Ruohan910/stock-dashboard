@@ -9,7 +9,7 @@
   "data": {
     "NVDA": {
       "ticker": "NVDA",
-      "fetched_at": "2026-06-21T16:07:23",
+      "fetched_at": "2026-06-21T22:16:26",
       "company": {
         "name": "NVIDIA Corporation",
         "sector": "Technology",
@@ -275,22 +275,11 @@
         "fcf_positive_and_growing": true,
         "ocf_exceeds_net_income": false
       },
-      "error": null,
-      "cross_check": [
-        {
-          "field": "price",
-          "yahoo_value": 210.69,
-          "twelve_value": null,
-          "available": false,
-          "error": "Twelve Data API key not configured",
-          "discrepancy_pct": null,
-          "flagged": false
-        }
-      ]
+      "error": null
     },
     "GOOGL": {
       "ticker": "GOOGL",
-      "fetched_at": "2026-06-21T16:08:23",
+      "fetched_at": "2026-06-21T22:14:25",
       "company": {
         "name": "Alphabet Inc.",
         "sector": "Communication Services",
@@ -556,22 +545,11 @@
         "fcf_positive_and_growing": true,
         "ocf_exceeds_net_income": true
       },
-      "error": null,
-      "cross_check": [
-        {
-          "field": "price",
-          "yahoo_value": 368.03,
-          "twelve_value": null,
-          "available": false,
-          "error": "Twelve Data API key not configured",
-          "discrepancy_pct": null,
-          "flagged": false
-        }
-      ]
+      "error": null
     },
     "AMZN": {
       "ticker": "AMZN",
-      "fetched_at": "2026-06-21T09:28:04",
+      "fetched_at": "2026-06-21T22:14:28",
       "company": {
         "name": "Amazon.com, Inc.",
         "sector": "Consumer Cyclical",
@@ -583,7 +561,25 @@
           "value": 7695000000.0,
           "source": "Yahoo Finance cashflow.Free Cash Flow",
           "confidence": "low",
-          "note": "Latest FCF (7,695,000,000) is 24% of the prior 2-year average (32,547,500,000) \u2014 a sharp drop, likely from a capex spike or one-off item. The DCF below uses this depressed figure as its base year; verify manually before trusting the output."
+          "note": "Latest FCF (7,695,000,000) is 24% of the prior 2-year average (32,547,500,000) \u2014 a sharp drop, likely from a capex spike or one-off item. The DCF below uses this depressed figure as its base year; verify manually before trusting the output.",
+          "history": [
+            [
+              "2025-12-31",
+              7695000000.0
+            ],
+            [
+              "2024-12-31",
+              32878000000.0
+            ],
+            [
+              "2023-12-31",
+              32217000000.0
+            ],
+            [
+              "2022-12-31",
+              -16893000000.0
+            ]
+          ]
         },
         "growth_rate_1_5": {
           "value": 0.1367,
@@ -595,25 +591,80 @@
           "value": 229083000000.0,
           "source": "Yahoo Finance balance_sheet.Current Assets",
           "confidence": "high",
-          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead"
+          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead",
+          "history": [
+            [
+              "2025-12-31",
+              229083000000.0
+            ],
+            [
+              "2024-12-31",
+              190867000000.0
+            ],
+            [
+              "2023-12-31",
+              172351000000.0
+            ],
+            [
+              "2022-12-31",
+              146791000000.0
+            ]
+          ]
         },
         "total_debt": {
           "value": 235540004864.0,
           "source": "Yahoo Finance info.totalDebt",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2025-12-31",
+              152987000000.0
+            ],
+            [
+              "2024-12-31",
+              130900000000.0
+            ],
+            [
+              "2023-12-31",
+              135611000000.0
+            ],
+            [
+              "2022-12-31",
+              140118000000.0
+            ]
+          ]
         },
         "shares_outstanding": {
           "value": 10757109436.0,
           "source": "Yahoo Finance info.sharesOutstanding",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2025-12-31",
+              10731000000.0
+            ],
+            [
+              "2024-12-31",
+              10593000000.0
+            ],
+            [
+              "2023-12-31",
+              10383000000.0
+            ],
+            [
+              "2022-12-31",
+              10242000000.0
+            ]
+          ]
         },
         "beta": {
           "value": 1.444,
           "source": "Yahoo Finance info.beta",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": []
         }
       },
       "dcf": {
@@ -742,6 +793,13 @@
         "assessment": "OVERVALUED (PEG > 1.5)",
         "notes": []
       },
+      "historical_pe": {
+        "low": 5.5,
+        "high": 31.7,
+        "years_covered": 11,
+        "current_pe": 28.95,
+        "position_text": "near the high end of its historical range"
+      },
       "profitability": {
         "gross_margin_pct": 48.5,
         "net_margin_pct": 12.2,
@@ -761,7 +819,7 @@
     },
     "HIMS": {
       "ticker": "HIMS",
-      "fetched_at": "2026-06-21T09:28:05",
+      "fetched_at": "2026-06-21T22:14:30",
       "company": {
         "name": "Hims & Hers Health, Inc.",
         "sector": "Healthcare",
@@ -773,7 +831,25 @@
           "value": 57415000.0,
           "source": "Yahoo Finance cashflow.Free Cash Flow",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2025-12-31",
+              57415000.0
+            ],
+            [
+              "2024-12-31",
+              198334000.0
+            ],
+            [
+              "2023-12-31",
+              46991000.0
+            ],
+            [
+              "2022-12-31",
+              -33778000.0
+            ]
+          ]
         },
         "growth_rate_1_5": {
           "value": 0.6,
@@ -785,25 +861,80 @@
           "value": 767638000.0,
           "source": "Yahoo Finance balance_sheet.Current Assets",
           "confidence": "high",
-          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead"
+          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead",
+          "history": [
+            [
+              "2025-12-31",
+              767638000.0
+            ],
+            [
+              "2024-12-31",
+              395831000.0
+            ],
+            [
+              "2023-12-31",
+              265053000.0
+            ],
+            [
+              "2022-12-31",
+              216595000.0
+            ]
+          ]
         },
         "total_debt": {
           "value": 1132036992.0,
           "source": "Yahoo Finance info.totalDebt",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2025-12-31",
+              1120590000.0
+            ],
+            [
+              "2024-12-31",
+              11345000.0
+            ],
+            [
+              "2023-12-31",
+              9948000.0
+            ],
+            [
+              "2022-12-31",
+              5307000.0
+            ]
+          ]
         },
         "shares_outstanding": {
           "value": 223080072.0,
           "source": "Yahoo Finance info.sharesOutstanding",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2025-12-31",
+              227245521.0
+            ],
+            [
+              "2024-12-31",
+              220837209.0
+            ],
+            [
+              "2023-12-31",
+              213481743.0
+            ],
+            [
+              "2022-12-31",
+              208429312.0
+            ]
+          ]
         },
         "beta": {
           "value": 2.398,
           "source": "Yahoo Finance info.beta",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": []
         }
       },
       "dcf": {
@@ -934,6 +1065,13 @@
           "Net income is negative or zero \u2014 P/E not meaningful"
         ]
       },
+      "historical_pe": {
+        "low": null,
+        "high": null,
+        "years_covered": 0,
+        "current_pe": null,
+        "position_text": "insufficient data"
+      },
       "profitability": {
         "gross_margin_pct": 73.1,
         "net_margin_pct": -0.6,
@@ -953,7 +1091,7 @@
     },
     "PLTR": {
       "ticker": "PLTR",
-      "fetched_at": "2026-06-21T09:28:06",
+      "fetched_at": "2026-06-21T22:14:33",
       "company": {
         "name": "Palantir Technologies Inc.",
         "sector": "Technology",
@@ -965,7 +1103,25 @@
           "value": 2100591000.0,
           "source": "Yahoo Finance cashflow.Free Cash Flow",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2025-12-31",
+              2100591000.0
+            ],
+            [
+              "2024-12-31",
+              1141231000.0
+            ],
+            [
+              "2023-12-31",
+              697069000.0
+            ],
+            [
+              "2022-12-31",
+              183710000.0
+            ]
+          ]
         },
         "growth_rate_1_5": {
           "value": 0.414,
@@ -977,25 +1133,80 @@
           "value": 8358174000.0,
           "source": "Yahoo Finance balance_sheet.Current Assets",
           "confidence": "high",
-          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead"
+          "note": "info.totalCurrentAssets was None \u2014 read from balance sheet statement instead",
+          "history": [
+            [
+              "2025-12-31",
+              8358174000.0
+            ],
+            [
+              "2024-12-31",
+              5934289000.0
+            ],
+            [
+              "2023-12-31",
+              4138618000.0
+            ],
+            [
+              "2022-12-31",
+              3041577000.0
+            ]
+          ]
         },
         "total_debt": {
           "value": 211976992.0,
           "source": "Yahoo Finance info.totalDebt",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2025-12-31",
+              229338000.0
+            ],
+            [
+              "2024-12-31",
+              239219000.0
+            ],
+            [
+              "2023-12-31",
+              229392000.0
+            ],
+            [
+              "2022-12-31",
+              249404000.0
+            ]
+          ]
         },
         "shares_outstanding": {
           "value": 2296071334.0,
           "source": "Yahoo Finance info.sharesOutstanding",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": [
+            [
+              "2025-12-31",
+              2391192000.0
+            ],
+            [
+              "2024-12-31",
+              2338795190.0
+            ],
+            [
+              "2023-12-31",
+              2200127714.0
+            ],
+            [
+              "2022-12-31",
+              2099075000.0
+            ]
+          ]
         },
         "beta": {
           "value": 1.515,
           "source": "Yahoo Finance info.beta",
           "confidence": "high",
-          "note": null
+          "note": null,
+          "history": []
         }
       },
       "dcf": {
@@ -1123,6 +1334,13 @@
         "price_fcf_ratio": 146.62,
         "assessment": "OVERVALUED (PEG > 1.5)",
         "notes": []
+      },
+      "historical_pe": {
+        "low": 8.8,
+        "high": 154.1,
+        "years_covered": 7,
+        "current_pe": 134.99,
+        "position_text": "near the high end of its historical range"
       },
       "profitability": {
         "gross_margin_pct": 70.6,

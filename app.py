@@ -32,7 +32,7 @@ from calculations import (
     calculate_health_screen,
     calculate_historical_pe_range,
 )
-from supply_demand import detect_zones, nearest_zones, calculate_rsi, suggest_action
+from supply_demand import detect_zones_for_timeframe, nearest_zones, calculate_rsi, suggest_action
 
 app = Flask(__name__)
 app.secret_key = "dev-only-change-if-this-ever-goes-public"
@@ -638,19 +638,18 @@ def chart(ticker):
     store = load_store()
 
     timeframe = request.args.get("tf", "weekly")
+    # Only fetch-related settings live here now — detection parameters
+    # (months_lookback, lookahead_candles, min_move_pct, candles_per_month)
+    # are owned by supply_demand.detect_zones_for_timeframe() so there's a
+    # single source of truth for them, instead of two configs that can
+    # silently drift out of sync.
     TIMEFRAME_CONFIG = {
-        "weekly": {"period": "3y",  "interval": "1wk", "months_lookback": 9,
-                   "label": "Weekly", "lookahead_candles": 3, "min_move_pct": 0.10,
-                   "candles_per_month": 4.33},
-        "daily":  {"period": "2y",  "interval": "1d",   "months_lookback": 4,
-                   "label": "Daily", "lookahead_candles": 5, "min_move_pct": 0.07,
-                   "candles_per_month": 21},
+        "weekly": {"period": "3y",  "interval": "1wk", "label": "Weekly"},
+        "daily":  {"period": "2y",  "interval": "1d",   "label": "Daily"},
         # Yahoo Finance has no native 4-hour interval — we fetch hourly
         # candles (max ~60 days available) and merge every 4 into one
         # 4H candle ourselves. See yahoo_provider.resample_to_4h.
-        "4h":     {"period": "60d", "interval": "1h",   "months_lookback": 2,
-                   "label": "4-Hour", "lookahead_candles": 5, "min_move_pct": 0.04,
-                   "candles_per_month": 21 * 1.625},  # ~6.5 4H candles per trading day * 21 days
+        "4h":     {"period": "60d", "interval": "1h",   "label": "4-Hour"},
     }
     if timeframe not in TIMEFRAME_CONFIG:
         timeframe = "weekly"
@@ -668,13 +667,7 @@ def chart(ticker):
         flash(f"No price history available for {ticker} at {cfg['label']} timeframe.")
         return redirect(url_for("detail", ticker=ticker))
 
-    zones = detect_zones(
-        candles,
-        months_lookback=cfg["months_lookback"],
-        lookahead_candles=cfg["lookahead_candles"],
-        min_move_pct=cfg["min_move_pct"],
-        candles_per_month=cfg["candles_per_month"],
-    )
+    zones = detect_zones_for_timeframe(candles, timeframe)
     current_price = candles[-1]["close"]
     nearest = nearest_zones(zones, current_price)
 
@@ -776,6 +769,7 @@ def chart(ticker):
         rsi_label=action.get("rsi_signal") or "—",
         dcf_low=fair_value_low,
         dcf_high=fair_value_high,
+        intrinsic_value=intrinsic_value,
         position=(
             "At demand zone" if action["at_demand_zone"]
             else "At supply zone" if action["at_supply_zone"]
