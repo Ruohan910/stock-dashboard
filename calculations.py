@@ -181,6 +181,60 @@ def calculate_dcf(fin, overrides: Optional[dict] = None) -> DCFResult:
 
 
 @dataclass
+class HistoricalPERange:
+    low: Optional[float]
+    high: Optional[float]
+    years_covered: int
+    current_pe: Optional[float]
+    position_text: str  # human-readable: "near the high end", "mid-range", etc.
+
+
+def calculate_historical_pe_range(yearly_close_prices: list, current_eps: Optional[float],
+                                   current_pe: Optional[float]) -> HistoricalPERange:
+    """
+    yearly_close_prices: list of (year_label, close_price) tuples, any order.
+    current_eps: trailing EPS used for the approximation below.
+
+    This is a simplification, not a precise historical P/E series: Yahoo
+    Finance doesn't expose trailing EPS for each historical year for free,
+    so we approximate historical P/E as (historical year-end price) /
+    (CURRENT trailing EPS) rather than each year's own EPS at the time.
+    This means the range reflects "what P/E would this price level imply
+    today" rather than "what was the P/E investors actually saw back then"
+    — close enough to gauge whether the current multiple looks rich or
+    cheap relative to where the stock has traded, but not a substitute for
+    a true point-in-time P/E history. The note text says so explicitly.
+    """
+    if not current_eps or current_eps <= 0 or not yearly_close_prices:
+        return HistoricalPERange(None, None, 0, current_pe, "insufficient data")
+
+    implied_pes = [price / current_eps for _, price in yearly_close_prices if price]
+    if len(implied_pes) < 2:
+        return HistoricalPERange(None, None, 0, current_pe, "insufficient data")
+
+    low, high = round(min(implied_pes), 1), round(max(implied_pes), 1)
+
+    position_text = "insufficient data"
+    if current_pe is not None and high > low:
+        position_pct = (current_pe - low) / (high - low)
+        if position_pct <= 0.25:
+            position_text = "near the low end of its historical range"
+        elif position_pct <= 0.45:
+            position_text = "below mid-range"
+        elif position_pct <= 0.65:
+            position_text = "mid-range"
+        elif position_pct <= 0.85:
+            position_text = "above mid-range"
+        else:
+            position_text = "near the high end of its historical range"
+
+    return HistoricalPERange(
+        low=low, high=high, years_covered=len(implied_pes),
+        current_pe=current_pe, position_text=position_text,
+    )
+
+
+@dataclass
 class MultiplesResult:
     pe_ratio: Optional[float]
     peg_ratio: Optional[float]

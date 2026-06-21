@@ -89,6 +89,18 @@ class YahooFinanceProvider(DataProvider):
         op_cf_history = self._get_history_from_cashflow(
             t, ["Operating Cash Flow", "Cash Flow From Continuing Operating Activities", "Total Cash From Operating Activities"]
         )
+        current_assets_history = self._get_history_from_balance_sheet(t, "Current Assets")
+        total_debt_history = self._get_history_from_balance_sheet(t, "Total Debt")
+        # yfinance has no "shares outstanding over time" series — the
+        # closest available proxy on the balance sheet is "Ordinary Shares
+        # Number" per fiscal year-end, which is what we use here.
+        shares_outstanding_history = self._get_history_from_balance_sheet(t, "Ordinary Shares Number")
+        # Beta has NO real history via Yahoo Finance — it's a single
+        # current value computed over a fixed lookback window, not a
+        # year-by-year series. We deliberately return an empty list rather
+        # than fabricating one, and the UI shows "no historical data"
+        # instead of a fake flat sparkline.
+        beta_history = []
 
         return StockFinancials(
             ticker=ticker,
@@ -110,6 +122,10 @@ class YahooFinanceProvider(DataProvider):
             net_income_history=net_income_history,
             fcf_history=fcf_history,
             operating_cashflow_history=op_cf_history,
+            current_assets_history=current_assets_history,
+            total_debt_history=total_debt_history,
+            shares_outstanding_history=shares_outstanding_history,
+            beta_history=beta_history,
         )
 
     def fetch_price_history(self, ticker: str, period: str = "1y", interval: str = "1wk") -> list:
@@ -333,6 +349,18 @@ class YahooFinanceProvider(DataProvider):
                         row = cf.loc[label]
                         return [(str(col.date()) if hasattr(col, "date") else str(col), float(val))
                                 for col, val in row.items() if val == val]
+        except Exception:
+            pass
+        return []
+
+    def _get_history_from_balance_sheet(self, t, label):
+        """Returns list of (year_label, value) tuples, most recent first."""
+        try:
+            bs = t.balance_sheet
+            if bs is not None and not bs.empty and label in bs.index:
+                row = bs.loc[label]
+                return [(str(col.date()) if hasattr(col, "date") else str(col), float(val))
+                        for col, val in row.items() if val == val]
         except Exception:
             pass
         return []

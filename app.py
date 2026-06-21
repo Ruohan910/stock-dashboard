@@ -21,6 +21,9 @@ from dataclasses import asdict
 from datetime import datetime
 from typing import Optional
 
+from dotenv import load_dotenv
+load_dotenv()  # reads .env locally; on Render, env vars are set in the dashboard instead and this is a no-op
+
 from flask import Flask, render_template, request, redirect, url_for, flash
 
 from yahoo_provider import YahooFinanceProvider, resample_to_4h
@@ -29,8 +32,10 @@ from calculations import (
     calculate_multiples,
     calculate_profitability,
     calculate_health_screen,
+    calculate_historical_pe_range,
 )
 from supply_demand import detect_zones, nearest_zones, calculate_rsi, suggest_action
+import twelve_data_provider
 
 app = Flask(__name__)
 app.secret_key = "dev-only-change-if-this-ever-goes-public"
@@ -77,8 +82,52 @@ def fetch_and_compute(ticker: str, overrides: Optional[dict] = None) -> dict:
     the auto-fetched values, never touches what the user typed in.
     """
     fin = provider.fetch(ticker)
-    raw_inputs_cache[ticker] = fin  # cache so override changes can recompute without refetching
-    return compute_from_financials(fin, overrides=overrides)
+
+    # Yearly price history for the historical P/E range note (Multiples
+    # section). Fetched here (not in compute_from_financials) because that
+    # function is meant to stay network-free so override changes can
+    # recompute without hitting the API again — see recompute_only().
+    try:
+        quarterly_candles = provider.fetch_price_history(ticker, period="10y", interval="3mo")
+        yearly_prices = _yearly_close_from_quarterly(quarterly_candles)
+    except Exception:
+        yearly_prices = []
+
+    # Cross-check key fields against a second, independent data source
+    # (Twelve Data) — same "always show your work" philosophy as the FCF
+    # anomaly detection. Skipped silently if no API key is configured;
+    # never blocks the refresh if Twelve Data is down or rate-limited.
+    cross_check_results = twelve_data_provider.cross_check(
+        ticker,
+        yahoo_price=fin.info.current_price,
+        yahoo_market_cap=fin.info.market_cap,
+        yahoo_shares=fin.shares_outstanding.value,
+    )
+
+    raw_inputs_cache[ticker] = (fin, yearly_prices)  # cache so override changes can recompute without refetching
+    result = compute_from_financials(fin, overrides=overrides, yearly_prices=yearly_prices)
+    result["cross_check"] = [
+        {
+            "field": r.field, "yahoo_value": r.yahoo_value, "twelve_value": r.twelve_value,
+            "available": r.available, "error": r.error,
+            "discrepancy_pct": r.discrepancy_pct, "flagged": r.flagged,
+        }
+        for r in cross_check_results
+    ]
+    return result
+
+
+def _yearly_close_from_quarterly(quarterly_candles: list) -> list:
+    """Reduces a list of quarterly candles down to one (year, close) pair
+    per calendar year, using each year's last available close."""
+    by_year = {}
+    for c in quarterly_candles:
+        date_str = c["date"] if isinstance(c["date"], str) else None
+        if not date_str:
+            continue
+        year = date_str[:4]
+        by_year[year] = c["close"]  # later entries in the list overwrite, leaving the last close per year
+    return list(by_year.items())
 
 
 def recompute_only(ticker: str, overrides: Optional[dict] = None) -> Optional[dict]:
@@ -89,19 +138,25 @@ def recompute_only(ticker: str, overrides: Optional[dict] = None) -> Optional[di
     Returns None if we have no cached fetch yet (caller should fall back
     to fetch_and_compute in that case).
     """
-    fin = raw_inputs_cache.get(ticker)
-    if fin is None:
+    cached = raw_inputs_cache.get(ticker)
+    if cached is None:
         return None
-    return compute_from_financials(fin, overrides=overrides)
+    fin, yearly_prices = cached
+    return compute_from_financials(fin, overrides=overrides, yearly_prices=yearly_prices)
 
 
-def compute_from_financials(fin, overrides: Optional[dict] = None) -> dict:
+def compute_from_financials(fin, overrides: Optional[dict] = None, yearly_prices: Optional[list] = None) -> dict:
     """Pure calculation step — no network calls. Takes an already-fetched
     StockFinancials object and runs DCF / multiples / profitability / health."""
     dcf = calculate_dcf(fin, overrides=overrides)
     multiples = calculate_multiples(fin)
     profitability = calculate_profitability(fin)
     health = calculate_health_screen(fin)
+    historical_pe = calculate_historical_pe_range(
+        yearly_close_prices=yearly_prices or [],
+        current_eps=fin.eps.value,
+        current_pe=multiples.pe_ratio,
+    )
 
     return {
         "ticker": fin.ticker,
@@ -113,15 +168,16 @@ def compute_from_financials(fin, overrides: Optional[dict] = None) -> dict:
             "market_cap": fin.info.market_cap,
         },
         "raw_inputs": {
-            "fcf": datapoint_to_dict(fin.fcf),
-            "growth_rate_1_5": datapoint_to_dict(fin.growth_rate_1_5),
-            "current_assets": datapoint_to_dict(fin.current_assets),
-            "total_debt": datapoint_to_dict(fin.total_debt),
-            "shares_outstanding": datapoint_to_dict(fin.shares_outstanding),
-            "beta": datapoint_to_dict(fin.beta),
+            "fcf": {**datapoint_to_dict(fin.fcf), "history": fin.fcf_history},
+            "growth_rate_1_5": datapoint_to_dict(fin.growth_rate_1_5),  # forward estimate — no trailing history to chart
+            "current_assets": {**datapoint_to_dict(fin.current_assets), "history": fin.current_assets_history},
+            "total_debt": {**datapoint_to_dict(fin.total_debt), "history": fin.total_debt_history},
+            "shares_outstanding": {**datapoint_to_dict(fin.shares_outstanding), "history": fin.shares_outstanding_history},
+            "beta": {**datapoint_to_dict(fin.beta), "history": fin.beta_history},  # always empty — Yahoo has no historical beta series
         },
         "dcf": asdict(dcf),
         "multiples": asdict(multiples),
+        "historical_pe": asdict(historical_pe),
         "profitability": asdict(profitability),
         "health": asdict(health),
         "error": None,
@@ -136,6 +192,47 @@ def compute_from_financials(fin, overrides: Optional[dict] = None) -> dict:
 # app.py's data structures as the source of truth and adapt at the
 # rendering boundary — that way the calculation layer never needs to know
 # anything about how the UI happens to be styled today.
+
+def _make_sparkline_svg(history: list, width: int = 80, height: int = 28) -> str:
+    """
+    Builds a minimal inline SVG sparkline from a (label, value) history
+    list (most-recent-first, as returned by the data provider). Returns
+    an empty string if there's not enough data to draw a meaningful line
+    (need at least 2 points) — the template shows a text fallback instead
+    of an empty/broken chart in that case.
+    """
+    values = [v for _, v in reversed(history) if v is not None]  # oldest first for left-to-right reading
+    if len(values) < 2:
+        return ""
+
+    min_v, max_v = min(values), max(values)
+    span = max_v - min_v
+    pad = 3
+    usable_h = height - 2 * pad
+
+    def y_for(v):
+        if span == 0:
+            return height / 2
+        return pad + (1 - (v - min_v) / span) * usable_h
+
+    step = width / (len(values) - 1)
+    points = [(round(i * step, 1), round(y_for(v), 1)) for i, v in enumerate(values)]
+
+    trend_up = values[-1] >= values[0]
+    color = "#54c08a" if trend_up else "#e7706a"
+
+    path = " ".join(f"{x},{y}" for x, y in points)
+    last_x, last_y = points[-1]
+
+    return (
+        f'<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}" '
+        f'xmlns="http://www.w3.org/2000/svg" style="display:block;">'
+        f'<polyline points="{path}" fill="none" stroke="{color}" stroke-width="1.5" '
+        f'stroke-linejoin="round" stroke-linecap="round"/>'
+        f'<circle cx="{last_x}" cy="{last_y}" r="2" fill="{color}"/>'
+        f'</svg>'
+    )
+
 
 def _fmt_money(value, decimals=2):
     if value is None:
@@ -249,12 +346,21 @@ def build_ticker_context(ticker: str, data: dict, overrides: dict) -> dict:
     }
 
     peg = multiples_raw.get("peg_ratio")
+    historical_pe = data.get("historical_pe", {})
+    pe_range_text = None
+    if historical_pe.get("low") is not None and historical_pe.get("high") is not None:
+        pe_range_text = (
+            f"Historical range ({historical_pe['years_covered']}yr, approx.): "
+            f"{historical_pe['low']:.1f}x – {historical_pe['high']:.1f}x — "
+            f"currently {historical_pe['position_text']}"
+        )
     multiples = {
         "pe": multiples_raw.get("pe_ratio") if multiples_raw.get("pe_ratio") is not None else "—",
         "peg": peg if peg is not None else "—",
         "pfcf": multiples_raw.get("price_fcf_ratio") if multiples_raw.get("price_fcf_ratio") is not None else "—",
         "note_class": "green" if (peg is not None and peg < 1.0) else "gray",
         "note_label": multiples_raw.get("assessment", "—"),
+        "pe_range_text": pe_range_text,
     }
 
     profit = {
@@ -302,11 +408,42 @@ def build_ticker_context(ticker: str, data: dict, overrides: dict) -> dict:
         note = dp.get("source", "")
         if dp.get("note"):
             note += f" — {dp['note']}"
+
+        history = dp.get("history", [])
+        sparkline = _make_sparkline_svg(history)
+        trend_text = None
+        if not sparkline and key != "growth_rate_1_5":
+            # No history available for this field at all (e.g. Beta) —
+            # say so explicitly rather than leaving a blank gap, so it
+            # reads as "data unavailable" rather than "broken".
+            trend_text = "No historical data available"
+        elif history and len(history) >= 2:
+            oldest_val = history[-1][1]
+            newest_val = history[0][1]
+            if oldest_val and oldest_val != 0:
+                change_pct = (newest_val - oldest_val) / abs(oldest_val) * 100
+                trend_text = f"{_format_source_value(key, oldest_val)} → {_format_source_value(key, newest_val)} ({change_pct:+.0f}% over {len(history)} periods)"
+
         sources.append({
             "label": label,
             "value": value_display,
             "note": note,
             "confidence": dp.get("confidence", "low"),
+            "sparkline": sparkline,
+            "trend_text": trend_text,
+        })
+
+    cross_check_raw = data.get("cross_check", [])
+    cross_check = []
+    for item in cross_check_raw:
+        cross_check.append({
+            "field": item["field"],
+            "yahoo_value": item["yahoo_value"],
+            "twelve_value": item["twelve_value"],
+            "available": item["available"],
+            "error": item["error"],
+            "discrepancy_pct": round(item["discrepancy_pct"], 1) if item["discrepancy_pct"] is not None else None,
+            "flagged": item["flagged"],
         })
 
     return {
@@ -316,6 +453,8 @@ def build_ticker_context(ticker: str, data: dict, overrides: dict) -> dict:
         "multiples": multiples,
         "profit": profit,
         "sources": sources,
+        "cross_check": cross_check,
+        "cross_check_configured": twelve_data_provider.is_configured(),
         "overrides": {
             "growth_rate_1_5": round(overrides.get("growth_rate_1_5", 0) * 100, 2) if overrides.get("growth_rate_1_5") is not None else "",
             "discount_rate": round(overrides.get("discount_rate", 0) * 100, 2) if overrides.get("discount_rate") is not None else "",
@@ -461,10 +600,17 @@ def set_override(ticker):
     # no new network call needed just to apply a manual number.
     ticker_overrides = store["overrides"].get(ticker, {})
     try:
+        previous_cross_check = store["data"].get(ticker, {}).get("cross_check")
         result = recompute_only(ticker, overrides=ticker_overrides)
         if result is None:
             # No cached fetch yet (e.g. fresh server restart) — fetch once
             result = fetch_and_compute(ticker, overrides=ticker_overrides)
+        elif previous_cross_check is not None:
+            # recompute_only() doesn't re-run the cross-check (it's a
+            # network call, kept out of the override-recompute path on
+            # purpose) — carry over the last fetch's cross-check results
+            # instead of losing them.
+            result["cross_check"] = previous_cross_check
         store["data"][ticker] = result
         save_store(store)
     except Exception as e:

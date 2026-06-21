@@ -70,12 +70,18 @@ class StockFinancials:
     total_assets: DataPoint
     eps: DataPoint
 
-    # 5-year trailing series for the Financial Health Screen.
-    # Each is a list of (year_label, value) tuples, most recent first.
+    # 5-year trailing series for the Financial Health Screen and for the
+    # Data Sources & Confidence sparklines. Each is a list of
+    # (year_label, value) tuples, most recent first.
     revenue_history: list
     net_income_history: list
     fcf_history: list
     operating_cashflow_history: list
+    current_assets_history: list
+    total_debt_history: list
+    shares_outstanding_history: list
+    beta_history: list  # beta has no real "history" via Yahoo Finance —
+                         # see yahoo_provider.py for how this is handled
 
 
 class DataProvider(ABC):

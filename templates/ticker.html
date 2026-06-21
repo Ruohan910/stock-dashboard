@@ -124,6 +124,9 @@
       </div>
       {% endfor %}
     </div>
+    {% if multiples.pe_range_text %}
+    <p class="faint" style="font-size:0.76rem;margin:12px 0 0;">{{ multiples.pe_range_text }}</p>
+    {% endif %}
   </section>
 </div>
 
@@ -148,13 +151,61 @@
       <div style="min-width:140px;">
         <div style="font-size:0.86rem;">{{ src.label }}</div>
         <div class="faint" style="font-size:0.72rem;margin-top:3px;max-width:520px;">{{ src.note }}</div>
+        {% if src.trend_text %}
+        <div class="faint" style="font-size:0.7rem;margin-top:4px;">{{ src.trend_text }}</div>
+        {% endif %}
       </div>
       <div style="display:flex;align-items:center;gap:12px;flex:none;">
+        {% if src.sparkline %}
+        <span title="5-year trend">{{ src.sparkline | safe }}</span>
+        {% endif %}
         <span class="num dim" style="font-size:0.86rem;">{{ src.value }}</span>
         <span class="badge {{ src.confidence }}" style="min-width:62px;text-align:center;">{{ src.confidence }}</span>
       </div>
     </div>
     {% endfor %}
   </div>
+</section>
+
+<section class="panel" style="margin-top:18px;">
+  <h3 class="h3" style="margin-bottom:4px;">Cross-check vs. Twelve Data</h3>
+  <p class="faint" style="margin:0 0 16px;font-size:0.8rem;">
+    A second, independent data source used to sanity-check key Yahoo Finance figures.
+  </p>
+  {% if not cross_check_configured %}
+    <p class="dim" style="font-size:0.85rem;">Cross-checking is not configured for this deployment (no Twelve Data API key set).</p>
+  {% elif not cross_check %}
+    <p class="dim" style="font-size:0.85rem;">No cross-check data available yet.</p>
+  {% else %}
+    <div style="display:flex; flex-direction:column;">
+      {% for c in cross_check %}
+      <div class="tk-source-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:13px 0;border-bottom:1px solid var(--hair);">
+        <div style="min-width:140px;">
+          <div style="font-size:0.86rem;">{{ c.field }}</div>
+          {% if not c.available %}
+            <div class="faint" style="font-size:0.72rem;margin-top:3px;">{{ c.error }}</div>
+          {% elif c.flagged %}
+            <div style="font-size:0.72rem;margin-top:3px;color:var(--red);">⚠ {{ c.discrepancy_pct }}% difference between sources — worth a manual check</div>
+          {% else %}
+            <div class="faint" style="font-size:0.72rem;margin-top:3px;">Sources agree (within {{ c.discrepancy_pct if c.discrepancy_pct is not none else 0 }}%)</div>
+          {% endif %}
+        </div>
+        <div style="display:flex; align-items:center; gap:16px; flex:none; text-align:right;">
+          <div>
+            <div class="faint" style="font-size:0.68rem;">YAHOO</div>
+            <div class="num" style="font-size:0.86rem;">{{ "%.2f"|format(c.yahoo_value) if c.yahoo_value is not none else "—" }}</div>
+          </div>
+          <div>
+            <div class="faint" style="font-size:0.68rem;">TWELVE DATA</div>
+            <div class="num" style="font-size:0.86rem;">{{ "%.2f"|format(c.twelve_value) if c.twelve_value is not none else "—" }}</div>
+          </div>
+          <span class="badge {% if not c.available %}gray{% elif c.flagged %}red{% else %}green{% endif %}" style="min-width:62px;text-align:center;">
+            {% if not c.available %}N/A{% elif c.flagged %}DIFFERS{% else %}MATCH{% endif %}
+          </span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 </section>
 {% endblock %}
