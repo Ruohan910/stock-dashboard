@@ -74,6 +74,52 @@
     margin-top:44px; padding-top:18px; text-align:center;}
   details>summary{list-style:none; cursor:pointer; color:var(--gold); font-size:0.85rem;}
   details>summary::-webkit-details-marker{display:none;}
+
+  /* ── Mobile-responsive layout classes ──────────────────────────────── */
+  .wl-header{display:flex; justify-content:space-between; align-items:flex-end; gap:20px; flex-wrap:wrap; margin-bottom:24px;}
+  .wl-counts{display:flex; gap:18px;}
+  .wl-count-item{text-align:right;}
+  .wl-count-divider{width:1px; background:var(--hair);}
+  .wl-toolbar{display:flex; gap:10px; align-items:center; margin-bottom:24px; flex-wrap:wrap;}
+  .wl-add-form{display:flex; gap:8px; flex:1; min-width:0;}
+  .wl-add-form input[type="text"]{flex:1; min-width:0;}
+  .wl-card-row{display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;}
+  .wl-card-link{display:flex; align-items:center; gap:28px; color:inherit; flex:1; min-width:0;}
+  .wl-card-id{min-width:0; flex:none;}
+  .wl-card-stats{display:flex; gap:30px; flex-wrap:wrap;}
+  .wl-card-actions{display:flex; align-items:center; gap:16px; flex:none;}
+
+  @media (max-width: 680px){
+    main{padding:20px 16px 64px;}
+    header.site{padding:14px 16px;}
+    .wl-header{align-items:flex-start;}
+    .wl-counts{width:100%; justify-content:space-between; gap:8px;}
+    .wl-toolbar{flex-direction:column; align-items:stretch;}
+    .wl-add-form{width:100%;}
+    .wl-toolbar form[action="/refresh-all"]{margin-left:0 !important; width:100%;}
+    .wl-toolbar form[action="/refresh-all"] button{width:100%; justify-content:center;}
+    .panel{padding:16px !important;}
+    .wl-card-row{flex-direction:column; align-items:stretch; gap:14px;}
+    .wl-card-link{flex-direction:column; align-items:flex-start; gap:10px;}
+    .wl-card-stats{gap:20px; width:100%;}
+    .wl-card-actions{width:100%; justify-content:space-between;}
+
+    .tk-hero-header{flex-direction:column; align-items:flex-start !important; gap:14px;}
+    .tk-hero-header > div:last-child{width:100%; display:flex; gap:8px;}
+    .tk-hero-header > div:last-child > *{flex:1;}
+    .tk-ticker-name{font-size:1.9rem !important;}
+    .tk-assumptions-grid{grid-template-columns:repeat(2,1fr) !important;}
+    .tk-health-multiples{grid-template-columns:1fr !important;}
+    .tk-health-checks{grid-template-columns:1fr !important;}
+    .tk-profit-grid{grid-template-columns:repeat(2,1fr) !important;}
+    .tk-valuation-row{flex-direction:column; align-items:flex-start !important; gap:6px;}
+    .tk-valuation-row > div:last-child{text-align:left !important;}
+    .tk-override-form{flex-direction:column; align-items:stretch !important;}
+    .tk-override-form input{width:100% !important;}
+    .tk-source-row{flex-direction:column; align-items:flex-start !important; gap:10px;}
+    .tk-source-row > div:first-child{min-width:0 !important; width:100%;}
+    .tk-source-row > div:last-child{width:100%; justify-content:space-between;}
+  }
 </style>
 {% block head %}{% endblock %}
 </head>
